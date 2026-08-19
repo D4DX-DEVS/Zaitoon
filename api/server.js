@@ -144,8 +144,14 @@ app.use((err, req, res, next) => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 
-startSupportPaymentReconciler();
-startScheduledContentPublisher();
-startHighlightExpiryJob();
-startDailyAnalyticsAggregator();
-startAnalyticsCleanup();
+// Background jobs write to and delete from the database. Set
+// DISABLE_BACKGROUND_JOBS=true when running locally against a shared cluster.
+if (process.env.DISABLE_BACKGROUND_JOBS === "true") {
+  console.log("Background jobs disabled (DISABLE_BACKGROUND_JOBS=true)");
+} else {
+  startSupportPaymentReconciler();
+  startScheduledContentPublisher();
+  startHighlightExpiryJob();
+  startDailyAnalyticsAggregator();
+  startAnalyticsCleanup();
+}

@@ -12,6 +12,10 @@ const QuizConfig = require("../models/quizConfig");
 const QuizQuestion = require("../models/quizQuestion");
 const User = require("../models/user");
 const { authenticateToken } = require("../middleware/auth");
+const {
+  getCurrentOrLatestQuizConfig,
+  getQuizConfigForQuiz
+} = require("../utils/quizConfigResolver");
 const router = express.Router();
 
 // Start of "today" and "tomorrow" in given timezone (daily rollover at 12:00 AM in that zone).
@@ -84,7 +88,7 @@ router.get("/stats", async (req, res) => {
   try {
     // Get current quiz configuration
     console.log("[STATS] Fetching quiz configuration...");
-    const config = await QuizConfig.findOne();
+    const config = await getCurrentOrLatestQuizConfig();
     
     if (!config) {
       console.log("[STATS] No quiz configuration found - returning empty leaderboard");
@@ -208,7 +212,7 @@ router.post("/attempt", async (req, res) => {
 
     // When user is logged in, enforce one attempt per day (by config timezone)
     if (userId) {
-      const configForDay = await QuizConfig.findOne();
+      const configForDay = await getCurrentOrLatestQuizConfig();
       const { startOfToday, startOfTomorrow } = getTodayRange(configForDay?.timezone);
 
       const existingAttempt = await QuizAttempt.findOne({
@@ -225,7 +229,7 @@ router.post("/attempt", async (req, res) => {
 
     // Get quiz configuration
     console.log("[ATTEMPT] Fetching quiz configuration...");
-    const config = await QuizConfig.findOne();
+    const config = await getCurrentOrLatestQuizConfig();
     if (!config) {
       console.error("[ATTEMPT] ERROR: Quiz configuration not found");
       const configCount = await QuizConfig.countDocuments();
@@ -740,11 +744,24 @@ router.get("/leaderboard/total", async (req, res) => {
       }
     }
 
+    // Guest attempts carry no userId, so grouping on userId alone collapses every
+    // guest attempt into a single row. Identify a person by userId when present
+    // and fall back to their normalised email.
+    const identityKey = {
+      $ifNull: [
+        { $toString: "$userId" },
+        { $toLower: { $ifNull: ["$emailNormalized", "$userSnapshot.email"] } }
+      ]
+    };
+
     const pipeline = [
       Object.keys(match).length ? { $match: match } : null,
+      { $addFields: { _identityKey: identityKey } },
+      { $match: { _identityKey: { $nin: [null, ""] } } },
       {
         $group: {
-          _id: "$userId",
+          _id: "$_identityKey",
+          userId: { $first: "$userId" },
           totalScore: { $sum: "$score" },
           totalDuration: { $sum: "$totalDuration" },
           attemptsCount: { $sum: 1 },
@@ -758,7 +775,7 @@ router.get("/leaderboard/total", async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "_id",
+          localField: "userId",
           foreignField: "_id",
           as: "_userDoc"
         }
@@ -806,7 +823,7 @@ router.get("/leaderboard/total", async (req, res) => {
 
     const leaderboard = result.data.map((item, index) => ({
       rank: skip + index + 1,
-      userId: item._id,
+      userId: item.userId || null,
       userName: item._name,
       userEmail: item._email,
       userClass: item._class,
@@ -997,7 +1014,7 @@ router.post("/:quizId/attempt", async (req, res) => {
     }
 
     // One attempt per email per day (any quiz), by config timezone
-    const configForDay = await QuizConfig.findOne();
+    const configForDay = await getCurrentOrLatestQuizConfig();
     const { startOfToday, startOfTomorrow } = getTodayRange(configForDay?.timezone);
     const alreadyAttemptedToday = await QuizAttempt.findOne({
       $or: [
@@ -1025,7 +1042,17 @@ router.post("/:quizId/attempt", async (req, res) => {
       return res.status(400).json({ success: false, message: "Answers must be a non-empty array" });
     }
 
-    const config = await QuizConfig.findOne();
+    const quiz = await Quiz.findById(quizId)
+      .populate("questions", "questionText mlQuestionText options mlOptions correctAnswer points difficulty")
+      .lean();
+
+    if (!quiz || quiz.status !== "Active") {
+      return res.status(404).json({ success: false, message: "Quiz not found or inactive" });
+    }
+
+    // Gate on the schedule this quiz belongs to, so an unrelated expired config
+    // cannot close submissions for a quiz that is still running.
+    const config = await getQuizConfigForQuiz(quiz);
     if (!config || !config.startDate || !config.endDate) {
       return res.status(503).json({ success: false, message: "Quiz is currently unavailable. Please try again later." });
     }
@@ -1038,14 +1065,6 @@ router.post("/:quizId/attempt", async (req, res) => {
     }
     if (now > config.endDate) {
       return res.status(410).json({ success: false, message: "Quiz has ended. The submission period is closed." });
-    }
-
-    const quiz = await Quiz.findById(quizId)
-      .populate("questions", "questionText mlQuestionText options mlOptions correctAnswer points difficulty")
-      .lean();
-
-    if (!quiz || quiz.status !== "Active") {
-      return res.status(404).json({ success: false, message: "Quiz not found or inactive" });
     }
 
     // When user is logged in, prevent multiple attempts for same quiz
