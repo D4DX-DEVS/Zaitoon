@@ -1,6 +1,7 @@
 const express = require("express");
 const QuizConfig = require("../models/quizConfig");
 const { authenticateToken } = require("../middleware/auth");
+const { getCurrentOrLatestQuizConfig } = require("../utils/quizConfigResolver");
 const router = express.Router();
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ router.get("/:id", async (req, res) => {
 // GET /api/quizzes/config - Get quiz configuration (public)
 router.get("/", async (req, res) => {
   try {
-    let config = await QuizConfig.findOne();
+    let config = await getCurrentOrLatestQuizConfig();
     
     // If no config exists, return default structure
     if (!config) {
@@ -210,6 +211,10 @@ router.put("/", authenticateToken, async (req, res) => {
       updateData.timezone = String(timezone).trim() || "Asia/Kolkata";
     }
 
+    // Several configs can exist, so target the current one instead of whichever
+    // document comes back first.
+    const existing = await getCurrentOrLatestQuizConfig();
+
     // Validate startDate < endDate if both are being updated
     if (updateData.startDate && updateData.endDate) {
       if (updateData.startDate >= updateData.endDate) {
@@ -220,7 +225,6 @@ router.put("/", authenticateToken, async (req, res) => {
       }
     } else if (updateData.startDate) {
       // If only startDate is updated, check against existing endDate
-      const existing = await QuizConfig.findOne();
       if (existing && updateData.startDate >= existing.endDate) {
         return res.status(400).json({
           success: false,
@@ -229,7 +233,6 @@ router.put("/", authenticateToken, async (req, res) => {
       }
     } else if (updateData.endDate) {
       // If only endDate is updated, check against existing startDate
-      const existing = await QuizConfig.findOne();
       if (existing && existing.startDate >= updateData.endDate) {
         return res.status(400).json({
           success: false,
@@ -238,9 +241,9 @@ router.put("/", authenticateToken, async (req, res) => {
       }
     }
 
-    // Use findOneAndUpdate with upsert to ensure only one config exists
+    // Update the resolved config, or create one when none exists yet
     const updatedConfig = await QuizConfig.findOneAndUpdate(
-      {}, // Empty filter - always matches the single document
+      existing ? { _id: existing._id } : {},
       updateData,
       {
         new: true,

@@ -6,6 +6,7 @@ const QuizQuestion = require("../models/quizQuestion");
 const User = require("../models/user");
 const { authenticateUser, authenticateToken } = require("../middleware/auth");
 const { retryAsync } = require("../utils/retry");
+const { getCurrentOrLatestQuizConfig } = require("../utils/quizConfigResolver");
 const router = express.Router();
 
 // GET /api/quiz-attempts/me/today - Get today's attempt for logged-in user
@@ -159,7 +160,7 @@ router.post("/attempt", async (req, res) => {
       });
     }
 
-    const config = await QuizConfig.findOne();
+    const config = await getCurrentOrLatestQuizConfig();
     if (!config) {
       return res.status(400).json({
         success: false,
