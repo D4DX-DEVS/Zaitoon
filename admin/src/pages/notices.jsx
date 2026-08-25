@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import { FiPlus, FiEdit3, FiTrash2, FiX, FiCheck, FiUpload, FiLink, FiImage } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
+import { SkeletonCards } from '../components/Skeleton'
 
 function Notices() {
   const [notices, setNotices] = useState([])
@@ -194,13 +195,13 @@ function Notices() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-56 h-screen overflow-y-auto scrollbar-hide">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 h-screen overflow-y-auto scrollbar-hide">
         <div className="max-w-4xl mx-auto px-4 py-8">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 Notices
@@ -224,8 +225,8 @@ function Notices() {
 
           {/* Create / Edit Form */}
           {showForm && (
-            <div className="bg-gray-900/80 border border-purple-500/30 rounded-2xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-gray-900/80 border border-purple-500/30 rounded-2xl p-4 sm:p-6 mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-white font-semibold text-lg">
                   {editingNotice ? 'Edit Notice' : 'New Notice'}
                 </h2>
@@ -368,7 +369,7 @@ function Notices() {
                   )}
                 </div>
 
-                <div className="flex space-x-3 pt-1">
+                <div className="flex flex-wrap gap-3 pt-1">
                   <button
                     type="submit"
                     className="flex items-center space-x-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors"
@@ -390,9 +391,7 @@ function Notices() {
 
           {/* Notices List */}
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            </div>
+            <SkeletonCards count={4} className="space-y-4" />
           ) : filteredNotices.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <p className="text-lg">No app notices yet.</p>
@@ -403,13 +402,13 @@ function Notices() {
               {filteredNotices.map(notice => (
                 <div
                   key={notice._id}
-                  className={`bg-gray-900/80 border rounded-2xl p-5 transition-colors ${
+                  className={`bg-gray-900/80 border rounded-2xl p-4 sm:p-5 transition-colors ${
                     notice.active
                       ? 'border-purple-500/20'
                       : 'border-gray-700/30 opacity-60'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
                         <h3 className="text-white font-semibold text-sm">{notice.title}</h3>
@@ -441,7 +440,7 @@ function Notices() {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2 flex-shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                       {/* Active toggle */}
                       <button
                         onClick={() => handleToggleActive(notice)}

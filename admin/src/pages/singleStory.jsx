@@ -10,6 +10,7 @@ import { FiPlus, FiEdit3, FiTrash2, FiX } from 'react-icons/fi'
 import { HiClock, HiCalendar } from 'react-icons/hi'
 import logo from '../assets/logo.png'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards, SkeletonText } from '../components/Skeleton'
 
 function SingleStoryManagement() {
   const SPACES_CDN_DOMAIN = import.meta.env.VITE_SPACES_CDN_DOMAIN
@@ -597,18 +598,18 @@ function SingleStoryManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Single Stories
@@ -620,7 +621,7 @@ function SingleStoryManagement() {
                 ></div>
               </h1>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-3">
               {hasReorderChanges && (
                 <button
                   onClick={handleSaveOrder}
@@ -670,9 +671,9 @@ function SingleStoryManagement() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center space-x-4">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-8">
+              <div className="flex flex-wrap items-center gap-4">
                 <img 
                   src={logo} 
                   alt="Zai Toon Logo" 
@@ -947,7 +948,7 @@ function SingleStoryManagement() {
               )}
 
               {/* Submit Buttons */}
-              <div className="flex justify-end space-x-4 pt-8">
+              <div className="flex flex-wrap justify-end gap-4 pt-8">
                 <button
                   type="button"
                   onClick={closeForm}
@@ -996,11 +997,9 @@ function SingleStoryManagement() {
         {/* Stories Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading && !showForm ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-white text-lg">Loading stories...</div>
-          </div>
+          <SkeletonCards count={12} className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 lg:gap-6" />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 lg:gap-6">
             {orderedStories.map((story, index) => {
               const isThisCardExpanded = expandedCard === story._id
               const currentStory = expandedCard === story._id && selectedStory ? selectedStory : story
@@ -1021,7 +1020,7 @@ function SingleStoryManagement() {
                 >
                   {/* Story Card */}
                   <div 
-                    className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-[180px] h-[220px] ${
+                    className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-full aspect-[9/11] md:aspect-auto md:w-[180px] md:h-[220px] ${
                       isThisCardExpanded 
                         ? 'scale-110 z-10 shadow-2xl border-blue-500' 
                         : 'hover:scale-105 hover:shadow-2xl border-transparent hover:border-gray-600'
@@ -1079,12 +1078,12 @@ function SingleStoryManagement() {
                       </button>
 
                       {/* Title Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 z-10">
-                        <h3 className="text-white text-sm font-semibold truncate mb-1">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 sm:p-3 z-10">
+                        <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">
                           {story.title}
                         </h3>
                         {story.mlTitle && (
-                          <p className="text-gray-300 text-xs truncate">
+                          <p className="text-gray-300 text-[9px] sm:text-xs truncate">
                             {story.mlTitle}
                           </p>
                         )}
@@ -1110,13 +1109,11 @@ function SingleStoryManagement() {
                         }}
                       >
                         {!currentStory.description ? (
-                          <div className="flex items-center justify-center py-20">
-                            <div className="text-white text-lg">Loading details...</div>
-                          </div>
+                          <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
                         ) : (
-                          <div className="p-6">
+                          <div className="p-4 sm:p-6">
                             {/* Header with Close Button */}
-                            <div className="flex justify-between items-start mb-6">
+                            <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                               <div className="flex-1">
                                 <div className="flex items-center space-x-3 mb-2">
                                   <h1 className="text-white text-2xl font-bold" style={{ fontFamily: 'Archivo Black' }}>
@@ -1297,7 +1294,7 @@ function SingleStoryManagement() {
                               </div>
                               
                               {/* Action Icons */}
-                              <div className="flex items-center space-x-3">
+                              <div className="flex flex-wrap items-center gap-3">
                       <button
                                   onClick={(e) => {
                                     e.preventDefault()
@@ -1380,7 +1377,7 @@ function SingleStoryManagement() {
         <img 
           src={gradient} 
           alt="Gradient" 
-          className="w-[800px] h-[800px] opacity-60"
+          className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
         />
       </div>
 
@@ -1397,8 +1394,8 @@ function SingleStoryManagement() {
       {/* Highlight Duration Popup — shown when star button is clicked to enable highlight */}
       {highlightPopup.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-4 sm:p-6 w-full max-w-sm shadow-2xl">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h3 className="text-white font-semibold text-base" style={{ fontFamily: 'Archivo Black' }}>
                 Set Highlight Duration
               </h3>

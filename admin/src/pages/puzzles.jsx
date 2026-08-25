@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import SchedulePicker from '../components/SchedulePicker'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 function Puzzles() {
   const [puzzles, setPuzzles] = useState([])
@@ -308,14 +309,14 @@ function Puzzles() {
   }, [currentPage])
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64 relative overflow-hidden">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Puzzles
@@ -330,7 +331,7 @@ function Puzzles() {
                 Manage puzzle library, translations, and CDN-backed media from one place.
               </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => {
                   resetForm()
@@ -359,9 +360,7 @@ function Puzzles() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading && puzzles.length === 0 ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-white text-lg">Loading puzzles...</div>
-            </div>
+            <SkeletonCards count={6} />
           ) : puzzles.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 text-lg mb-6">No puzzles found</div>
@@ -377,7 +376,7 @@ function Puzzles() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 lg:gap-6 pb-6">
               {puzzles.map((puzzle) => (
                 <div 
                   key={puzzle._id}
@@ -540,8 +539,8 @@ function Puzzles() {
 
         {showForm && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex justify-between items-start mb-4">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-4 sm:p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
                 <div>
                   <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                     {editingPuzzle ? 'Edit Puzzle' : 'Add New Puzzle'}
@@ -689,7 +688,7 @@ function Puzzles() {
                     const isRequired = lang === 'en'
                     return (
                       <div key={lang} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
                           <h3 className="text-white text-sm font-semibold uppercase" style={{ fontFamily: 'Archivo Black' }}>
                             {lang}
                           </h3>
@@ -743,7 +742,7 @@ function Puzzles() {
                   />
                 )}
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-white/10">
+                <div className="flex flex-wrap justify-end gap-3 pt-4 border-t border-white/10">
                   <button
                     type="button"
                     onClick={resetForm}
@@ -793,7 +792,7 @@ function Puzzles() {
           <img 
             src={gradient} 
             alt="Gradient" 
-            className="w-[800px] h-[800px]"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px]"
           />
         </div>
 

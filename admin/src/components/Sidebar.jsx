@@ -24,7 +24,8 @@ import {
   SparklesIcon,
   MegaphoneIcon,
   ClockIcon,
-  PaintBrushIcon
+  PaintBrushIcon,
+  IdentificationIcon
 } from '@heroicons/react/24/outline'
 import logo from '../assets/logo.png'
 import dxLogo from '../assets/dxLogoWhite.png'
@@ -77,6 +78,7 @@ const menuGroups = [
       { label: 'Banners', path: '/banners', icon: PhotoIcon },
       { label: 'Payment Banner', path: '/payment-banner', icon: CreditCardIcon },
       { label: 'Subscriptions', path: '/subscriptions', icon: CreditCardIcon },
+      { label: 'Membership', path: '/membership', icon: IdentificationIcon },
       { label: 'Notifications', path: '/notifications', icon: BellAlertIcon },
     ]
   },
@@ -99,6 +101,15 @@ const menuGroups = [
   }
 ]
 
+// Bottom bar items on mobile — everything else lives in the "More" sheet (no duplicates)
+const mobileMainItems = [
+  { label: 'Home', path: '/dashboard', icon: HomeIcon },
+  { label: 'Stories', path: '/stories', icon: BookOpenIcon },
+  { label: 'Videos', path: '/videos', icon: VideoCameraIcon },
+  { label: 'Bright Box', path: '/bright-box', icon: SparklesIcon },
+]
+const mobileMainPaths = new Set(mobileMainItems.map(i => i.path))
+
 // Flatten all items for command palette
 const allMenuItems = menuGroups.flatMap(group => 
   group.items.map(item => ({
@@ -111,6 +122,8 @@ function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [showCommandPalette, setShowCommandPalette] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   // Initialize with the active group already expanded (avoids jump on remount)
@@ -148,6 +161,8 @@ function Sidebar() {
       }
       if (e.key === 'Escape') {
         setShowCommandPalette(false)
+        setShowLogoutConfirm(false)
+        setShowMoreMenu(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -194,7 +209,7 @@ function Sidebar() {
 
   return (
     <>
-      <div className="bg-violet-900/95 backdrop-blur-sm border-r border-violet-800/60 h-screen w-56 fixed left-0 top-0 z-40 shadow-xl flex flex-col">
+      <div className="bg-violet-900/95 backdrop-blur-sm border-r border-violet-800/60 h-screen w-56 fixed left-0 top-0 z-40 shadow-xl hidden md:flex flex-col">
         <div className="p-4 flex flex-col h-full min-h-0">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center mb-5 px-2">
@@ -218,7 +233,7 @@ function Sidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-0.5 scroll-smooth scrollbar-hide">
-            {menuGroups.map((group, groupIdx) => {
+            {menuGroups.map((group) => {
               // Standalone items (no group label)
               if (!group.label) {
                 return group.items.map(item => (
@@ -285,7 +300,7 @@ function Sidebar() {
           {/* Logout */}
           <div className="flex-shrink-0 mt-auto pt-4 border-t border-violet-800/50">
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="w-full flex items-center space-x-3 px-3 py-2.5 text-violet-300 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group mb-4"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:text-red-400" />
@@ -301,6 +316,130 @@ function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-violet-900/95 backdrop-blur-sm border-t border-violet-800/60 flex pb-[env(safe-area-inset-bottom)]">
+        {mobileMainItems.map(item => (
+          <button
+            key={item.path}
+            onClick={() => { setShowMoreMenu(false); navigate(item.path) }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors ${
+              isActive(item.path) ? 'text-purple-400' : 'text-violet-300'
+            }`}
+          >
+            <item.icon className="w-5 h-5" />
+            <span className="text-[10px] font-medium leading-none">{item.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setShowMoreMenu(true)}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors ${
+            showMoreMenu || !mobileMainPaths.has(location.pathname) ? 'text-purple-400' : 'text-violet-300'
+          }`}
+        >
+          <ListBulletIcon className="w-5 h-5" />
+          <span className="text-[10px] font-medium leading-none">More</span>
+        </button>
+      </nav>
+
+      {/* Mobile "More" sheet — only items not already in the bottom bar */}
+      {showMoreMenu && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end"
+          onClick={() => setShowMoreMenu(false)}
+        >
+          <div
+            className="w-full max-h-[80vh] overflow-y-auto bg-violet-900 border-t border-violet-800/60 rounded-t-2xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-violet-700" />
+
+            <button
+              onClick={() => { setShowMoreMenu(false); setShowCommandPalette(true); setSearchQuery('') }}
+              className="flex items-center space-x-2 w-full px-3 py-2 mb-4 rounded-lg bg-violet-800/40 border border-violet-700/50 text-violet-300 text-sm"
+            >
+              <MagnifyingGlassIcon className="w-4 h-4" />
+              <span>Search...</span>
+            </button>
+
+            {menuGroups.map(group => {
+              const items = group.items.filter(item => !mobileMainPaths.has(item.path))
+              if (items.length === 0) return null
+              return (
+                <div key={group.label || 'general'} className="mb-4">
+                  {group.label && (
+                    <p className="px-1 mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-violet-400">
+                      {group.label}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {items.map(item => (
+                      <button
+                        key={item.path}
+                        onClick={() => { setShowMoreMenu(false); navigate(item.path) }}
+                        className={`flex items-center space-x-2 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          isActive(item.path)
+                            ? 'text-white bg-purple-600/25 border border-purple-500/30'
+                            : 'text-violet-200 bg-violet-800/40'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-xs font-medium truncate">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+
+            <button
+              onClick={() => { setShowMoreMenu(false); setShowLogoutConfirm(true) }}
+              className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 mt-2 text-red-400 bg-red-500/10 rounded-lg"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout confirmation */}
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99999] flex items-center justify-center p-4"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            className="bg-gray-900/95 backdrop-blur-lg border border-gray-700/60 rounded-2xl w-full max-w-sm shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                <ArrowRightOnRectangleIcon className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Log out?</h3>
+            </div>
+            <p className="text-sm text-gray-400 mb-6">
+              You will be signed out of the admin panel and returned to the login page.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                autoFocus
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Command Palette (⌘K) */}
       {showCommandPalette && (

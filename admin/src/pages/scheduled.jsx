@@ -12,6 +12,7 @@ import {
   FiCalendar
 } from 'react-icons/fi'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 
@@ -138,18 +139,18 @@ export default function Scheduled() {
   const displayItems = filterStatus === 'all' ? items : (groupedByStatus[filterStatus] || [])
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Right gradient decoration */}
         <img src={gradient} alt="" className="fixed right-0 top-0 h-full object-cover opacity-30 pointer-events-none select-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
             <div>
               <h1
-                className="text-white text-4xl font-bold mb-1 relative"
+                className="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Scheduled Uploads
@@ -208,9 +209,7 @@ export default function Scheduled() {
 
           {/* Content list */}
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
-            </div>
+            <SkeletonCards count={5} className="space-y-3" />
           ) : displayItems.length === 0 ? (
             <div className="text-center py-20">
               <FiClock className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -298,8 +297,8 @@ export default function Scheduled() {
       {/* Reschedule Modal */}
       {editingItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-4 sm:p-6 w-full max-w-md">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h2 className="text-white text-lg font-bold">Reschedule Upload</h2>
               <button onClick={() => setEditingItem(null)} className="text-gray-400 hover:text-white">
                 <FiX className="w-5 h-5" />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
+import { SkeletonCards } from '../components/Skeleton'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 
@@ -56,17 +57,19 @@ function PaymentBanner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex">
+      <div className="min-h-screen bg-black flex overflow-x-clip">
         <Sidebar />
-        <div className="flex-1 ml-64 flex items-center justify-center text-white">Loading...</div>
+        <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 p-8">
+          <SkeletonCards count={3} />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64 p-8 max-w-2xl">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 p-8 max-w-2xl">
         <h1 className="text-white text-3xl font-bold mb-6" style={{ fontFamily: 'Archivo Black' }}>Payment Banner</h1>
         <p className="text-gray-400 text-sm mb-6">Banner is shown on the app only when Active is on.</p>
 

@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar'
 import SchedulePicker from '../components/SchedulePicker'
 import HighlightDurationPicker from '../components/HighlightDurationPicker'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 const SPACES_CDN_DOMAIN = import.meta.env.VITE_SPACES_CDN_DOMAIN
 
@@ -792,13 +793,13 @@ const BrightBox = () => {
       {/* Sidebar */}
       <Sidebar />
       
-      <div className="flex-1 ml-64 h-screen overflow-y-auto scrollbar-hide">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 h-screen overflow-y-auto scrollbar-hide">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Bright Box
@@ -810,7 +811,7 @@ const BrightBox = () => {
                 ></div>
               </h1>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
                 onClick={() => setShowBrightBoxStoryForm(true)}
                 className="flex items-center justify-center space-x-2 text-white transition duration-200"
@@ -857,7 +858,7 @@ const BrightBox = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="mb-8">
             <h2 
-              className="text-white text-2xl font-bold mb-6 relative"
+              className="text-white text-xl sm:text-2xl font-bold mb-4 sm:mb-6 relative"
               style={{ fontFamily: 'Archivo Black' }}
             >
               Bright Box Categories
@@ -881,7 +882,7 @@ const BrightBox = () => {
                 </button>
               </div>
              ) : (
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
+               <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 mb-4">
                  {/* Category Cards - Limited Display */}
                  {brightBoxes.slice(0, 5).map((brightBox) => {
                    const storyCount = brightBox.storyCount ?? 0
@@ -893,7 +894,7 @@ const BrightBox = () => {
                        className="relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-gray-600 hover:scale-105 hover:shadow-2xl"
                      >
                        {/* Category Image */}
-                       <div className="relative h-32 overflow-hidden">
+                       <div className="relative h-24 sm:h-32 overflow-hidden">
                          {brightBox.image ? (
                            <img
                              src={resolveImageUrl(brightBox.image)}
@@ -908,7 +909,7 @@ const BrightBox = () => {
                        </div>
 
                        {/* Category Info */}
-                       <div className="p-4">
+                       <div className="p-2.5 sm:p-4">
                          <h3 className="text-white text-sm font-semibold truncate mb-2">
                            {brightBox.title}
                          </h3>
@@ -930,8 +931,8 @@ const BrightBox = () => {
                        : 'border-dashed border-gray-600 hover:border-purple-500 hover:scale-105 hover:shadow-2xl'
                    }`}
                  >
-                   <div className="relative h-32 w-full flex items-center justify-center">
-                     <div className="flex flex-col items-center justify-center transform translate-y-8">
+                   <div className="relative h-full min-h-[120px] sm:min-h-[176px] w-full flex items-center justify-center p-2">
+                     <div className="flex flex-col items-center justify-center">
                        <div className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                          showCategoryTable 
                            ? 'bg-purple-600/30 border-purple-400' 
@@ -980,15 +981,15 @@ const BrightBox = () => {
                 e.preventDefault()
               }}
             >
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Header with Close Button */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                   <div className="flex-1">
                     <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                       Category Management
                     </h1>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => {
                         setShowBrightBoxForm(true)
@@ -1037,12 +1038,12 @@ const BrightBox = () => {
                     <table className="w-full">
                       <thead className="sticky top-0 bg-transparent backdrop-blur-sm z-10">
                         <tr className="border-b border-gray-700/50">
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold w-8"></th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Image</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Title</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Stories</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Created</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Actions</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold w-8"></th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Image</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Title</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Stories</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Created</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1236,7 +1237,7 @@ const BrightBox = () => {
             </div>
 
             {/* Stories Row - Limited Display */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4">
               {/* Display first 5 stories */}
               {brightBoxStories.slice(0, 5).map((story) => (
                 <div 
@@ -1245,7 +1246,7 @@ const BrightBox = () => {
                   className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group cursor-pointer"
                 >
                   {/* Story Image */}
-                  <div className="relative h-32 bg-gradient-to-br from-green-600/20 to-blue-600/20 overflow-hidden">
+                  <div className="relative h-24 sm:h-32 bg-gradient-to-br from-green-600/20 to-blue-600/20 overflow-hidden">
                     {story.image ? (
                       <img
                         src={resolveImageUrl(story.image)}
@@ -1261,7 +1262,7 @@ const BrightBox = () => {
                   </div>
 
                   {/* Story Content */}
-                  <div className="p-4">
+                  <div className="p-2.5 sm:p-4">
                     <div className="mb-2">
                       <div className="flex items-center space-x-2 mb-1">
                         <h4 className="text-white text-sm font-bold truncate flex-1" style={{ fontFamily: 'Archivo Black' }}>
@@ -1295,8 +1296,8 @@ const BrightBox = () => {
                     : 'border-dashed border-gray-600 hover:border-purple-500 hover:scale-105 hover:shadow-2xl'
                 }`}
               >
-                <div className="relative h-32 w-full flex items-center justify-center">
-                  <div className="flex flex-col items-center justify-center transform translate-y-8">
+                <div className="relative h-full min-h-[120px] sm:min-h-[176px] w-full flex items-center justify-center p-2">
+                  <div className="flex flex-col items-center justify-center">
                     <div className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                       showStoriesTable 
                         ? 'bg-purple-600/30 border-purple-400' 
@@ -1332,7 +1333,7 @@ const BrightBox = () => {
           <img 
             src={gradient} 
             alt="Gradient" 
-            className="w-[800px] h-[800px] opacity-60"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           />
         </div>
       </div>
@@ -1341,14 +1342,14 @@ const BrightBox = () => {
       {expandedCategory && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Header with Close Button */}
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                 <div className="flex-1">
                   <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                     {expandedCategory.title}
                   </h1>
-                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-400">
                     <div className="flex items-center space-x-1">
                       <FiFile className="w-4 h-4 text-green-400" />
                       <span>{categoryStoriesLoading ? '…' : categoryStories.length} stories</span>
@@ -1365,7 +1366,7 @@ const BrightBox = () => {
 
               {/* Stories in this category */}
               <div className="mb-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                   <h3 className="text-white text-lg font-semibold" style={{ fontFamily: 'Archivo Black' }}>
                     Stories
                   </h3>
@@ -1382,9 +1383,7 @@ const BrightBox = () => {
                   </button>
                 </div>
                 {categoryStoriesLoading ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-400 text-sm">Loading stories…</p>
-                  </div>
+                  <SkeletonCards count={4} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" />
                 ) : categoryStories.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400 text-sm mb-4">No stories in this category yet</p>
@@ -1457,7 +1456,7 @@ const BrightBox = () => {
                 </div>
                 
                 {/* Action Icons */}
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => {
                       editBrightBox(expandedCategory)
@@ -1489,9 +1488,9 @@ const BrightBox = () => {
       {expandedStory && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Header with Close Button */}
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h1 className="text-white text-2xl font-bold" style={{ fontFamily: 'Archivo Black' }}>
@@ -1717,7 +1716,7 @@ const BrightBox = () => {
                 </div>
                 
                 {/* Action Icons */}
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => {
                       editBrightBoxStory(expandedStory)
@@ -1749,13 +1748,13 @@ const BrightBox = () => {
       {showStoriesTable && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth animate-in slide-in-from-top-4 duration-500 ease-out">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Header */}
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-white text-2xl font-bold" style={{ fontFamily: 'Archivo Black' }}>
                   Stories Management
                 </h2>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => setShowBrightBoxStoryForm(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition duration-200 text-sm font-medium"
@@ -1789,13 +1788,13 @@ const BrightBox = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-700/50">
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium w-8"></th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Image</th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Title</th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Category</th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Files</th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Created</th>
-                        <th className="text-left py-3 px-4 text-gray-400 font-medium">Actions</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium w-8"></th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Image</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Title</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Category</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Files</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Created</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-gray-400 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1983,8 +1982,8 @@ const BrightBox = () => {
       {/* Bright Box Form Modal */}
       {showBrightBoxForm && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 {editingBrightBox ? 'Edit Bright Box' : 'Add New Bright Box'}
               </h2>
@@ -2112,8 +2111,8 @@ const BrightBox = () => {
       {/* Bright Box Story Form Modal */}
       {showBrightBoxStoryForm && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 {editingBrightBoxStory ? 'Edit Bright Box Story' : 'Add New Bright Box Story'}
               </h2>
@@ -2475,8 +2474,8 @@ const BrightBox = () => {
       {/* Story Details Modal */}
       {showStoryDetails && selectedBrightBoxStory && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 Story Details
               </h2>
@@ -2490,7 +2489,7 @@ const BrightBox = () => {
 
             <div className="space-y-4">
               {/* Header Info */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xl font-semibold text-white">{selectedBrightBoxStory.title}</h3>
                   {selectedBrightBoxStory.mlTitle && <p className="text-gray-400">{selectedBrightBoxStory.mlTitle}</p>}

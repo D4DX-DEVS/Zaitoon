@@ -9,6 +9,11 @@ import {
   getKidsCornerAnalytics,
   getBookmarkAnalytics,
 } from "../services/analyticsService";
+import { SkeletonStats, SkeletonTable } from '../components/Skeleton'
+import {
+  FiVideo, FiBookOpen, FiFileText, FiZap, FiHelpCircle,
+  FiGrid, FiSmile, FiBookmark,
+} from "react-icons/fi";
 import {
   ChartBarIcon,
   VideoCameraIcon,
@@ -58,7 +63,7 @@ function StatCard({ icon: Icon, label, value, sub, color = "#7C3AED" }) {
       className="rounded-xl border border-violet-500/30 bg-gray-900/80 backdrop-blur-sm p-5 shadow-lg"
       style={{ borderColor: `${color}40` }}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-gray-400 text-sm font-medium mb-1 truncate">{label}</p>
           <p className="text-2xl font-bold text-white" style={{ color }}>
@@ -212,9 +217,9 @@ export default function Analytics() {
   const featureUsage = overview?.featureUsage || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-56">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -272,8 +277,9 @@ export default function Analytics() {
 
           {/* Loading */}
           {loading && (
-            <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500" />
+            <div className="space-y-6">
+              <SkeletonStats count={4} />
+              <SkeletonTable rows={6} cols={4} />
             </div>
           )}
 
@@ -326,14 +332,14 @@ export default function Analytics() {
                   <Section title="Feature Usage" icon={ChartBarIcon}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
-                        { key: "video", label: "Videos", icon: "🎬" },
-                        { key: "story", label: "Stories", icon: "📖" },
-                        { key: "single_story", label: "Single Stories", icon: "📝" },
-                        { key: "brightbox", label: "BrightBox", icon: "✨" },
-                        { key: "quiz", label: "Quizzes", icon: "🧠" },
-                        { key: "puzzle", label: "Puzzles", icon: "🧩" },
-                        { key: "kids_corner", label: "Kids Corner", icon: "🎨" },
-                        { key: "bookmark", label: "Bookmarks", icon: "🔖" },
+                        { key: "video", label: "Videos", icon: FiVideo, color: "text-red-400" },
+                        { key: "story", label: "Stories", icon: FiBookOpen, color: "text-blue-400" },
+                        { key: "single_story", label: "Single Stories", icon: FiFileText, color: "text-teal-400" },
+                        { key: "brightbox", label: "BrightBox", icon: FiZap, color: "text-yellow-400" },
+                        { key: "quiz", label: "Quizzes", icon: FiHelpCircle, color: "text-pink-400" },
+                        { key: "puzzle", label: "Puzzles", icon: FiGrid, color: "text-green-400" },
+                        { key: "kids_corner", label: "Kids Corner", icon: FiSmile, color: "text-orange-400" },
+                        { key: "bookmark", label: "Bookmarks", icon: FiBookmark, color: "text-purple-400" },
                       ].map((f) => {
                         const usage = featureUsage[f.key] || {};
                         return (
@@ -342,7 +348,7 @@ export default function Analytics() {
                             className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30"
                           >
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-lg">{f.icon}</span>
+                              <f.icon className={`w-4 h-4 ${f.color}`} />
                               <span className="text-sm text-gray-300 font-medium">{f.label}</span>
                             </div>
                             <p className="text-xl font-bold text-white">{usage.count ?? 0}</p>

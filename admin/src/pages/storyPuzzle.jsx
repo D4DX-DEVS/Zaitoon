@@ -4,10 +4,12 @@ import {
   FiArrowUp, FiArrowDown, FiStar, FiClock, FiRefreshCw, FiSearch,
   FiChevronLeft, FiChevronRight
 } from 'react-icons/fi'
+import { FaMedal, FaSeedling, FaLeaf, FaFire } from 'react-icons/fa'
 import { BookOpenIcon, TrophyIcon } from '@heroicons/react/24/outline'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonTable } from '../components/Skeleton'
 
 const ITEMS_PER_PAGE = 10
 const DIFFICULTIES = ['easy', 'medium', 'hard']
@@ -32,7 +34,7 @@ const emptyForm = () => ({
 function Toast({ toast, onClose }) {
   if (!toast) return null
   return (
-    <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
+    <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-2 py-3 sm:px-4 rounded-xl shadow-lg border ${
       toast.type === 'success' ? 'bg-green-900/80 border-green-500/40 text-green-300' : 'bg-red-900/80 border-red-500/40 text-red-300'
     }`}>
       {toast.type === 'success' ? <FiCheckCircle size={18} /> : <FiAlertCircle size={18} />}
@@ -153,15 +155,15 @@ function PuzzleFormModal({ puzzle, onClose, onSaved }) {
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
       <div className="bg-gray-900 border border-purple-500/30 rounded-2xl w-full max-w-2xl my-4">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h2 className="text-white font-bold text-lg">
-            {puzzle ? '✏️ Edit Puzzle' : '➕ New Story Puzzle'}
+          <h2 className="text-white font-bold text-lg flex items-center gap-2">
+            {puzzle ? <><FiEdit3 className="w-5 h-5" /> Edit Puzzle</> : <><FiPlus className="w-5 h-5" /> New Story Puzzle</>}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white"><FiX size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
           {/* Prophet details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-xs mb-1 block">Prophet Name (EN) *</label>
               <input value={form.prophetName} onChange={e => setField('prophetName', e.target.value)}
@@ -200,7 +202,7 @@ function PuzzleFormModal({ puzzle, onClose, onSaved }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-xs mb-1 block">Description (EN)</label>
               <textarea value={form.description} onChange={e => setField('description', e.target.value)}
@@ -216,7 +218,7 @@ function PuzzleFormModal({ puzzle, onClose, onSaved }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-xs mb-1 block">Moral (EN)</label>
               <textarea value={form.moral} onChange={e => setField('moral', e.target.value)}
@@ -241,7 +243,7 @@ function PuzzleFormModal({ puzzle, onClose, onSaved }) {
 
           {/* Events */}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
               <label className="text-gray-300 text-sm font-semibold">
                 Story Events <span className="text-red-400">*</span>
                 <span className="text-gray-500 text-xs font-normal ml-2">({form.events.length} events — order matters)</span>
@@ -290,7 +292,7 @@ function ViewPuzzleModal({ puzzle, onClose, onEdit }) {
       <div className="bg-gray-900 border border-purple-500/30 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{puzzle.icon}</span>
+            <span className="text-2xl sm:text-3xl">{puzzle.icon}</span>
             <div>
               <h2 className="text-white font-bold">Prophet {puzzle.prophetName}</h2>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${DIFFICULTY_BG[puzzle.difficulty]}`}>
@@ -305,7 +307,7 @@ function ViewPuzzleModal({ puzzle, onClose, onEdit }) {
             <p className="text-gray-400 text-sm">{puzzle.description}</p>
           )}
           <div>
-            <h4 className="text-gray-300 text-sm font-semibold mb-2">📖 Story Events ({puzzle.events?.length})</h4>
+            <h4 className="text-gray-300 text-sm font-semibold mb-2 flex items-center gap-1.5"><BookOpenIcon className="w-4 h-4" /> Story Events ({puzzle.events?.length})</h4>
             <div className="space-y-2">
               {(puzzle.events || []).sort((a, b) => a.order - b.order).map((ev, i) => (
                 <div key={i} className="flex gap-3 bg-gray-800/50 rounded-lg p-3">
@@ -320,7 +322,7 @@ function ViewPuzzleModal({ puzzle, onClose, onEdit }) {
           </div>
           {puzzle.moral && (
             <div className="bg-purple-900/20 border border-purple-500/20 rounded-lg p-3">
-              <p className="text-purple-300 text-xs font-semibold mb-1">💡 Moral</p>
+              <p className="text-purple-300 text-xs font-semibold mb-1 flex items-center gap-1.5"><FiStar className="w-3.5 h-3.5" /> Moral</p>
               <p className="text-gray-300 text-sm">{puzzle.moral}</p>
             </div>
           )}
@@ -483,16 +485,16 @@ function PuzzlesTab() {
       </div>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
         {DIFFICULTIES.map(d => {
           const cnt = puzzles.filter(p => p.difficulty === d).length
           return (
-            <div key={d} className="bg-gray-800/40 border border-gray-700 rounded-xl p-4 flex items-center justify-between">
+            <div key={d} className="bg-gray-800/40 border border-gray-700 rounded-xl p-2.5 sm:p-4 flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-xs">{d.charAt(0).toUpperCase() + d.slice(1)}</p>
-                <p className={`text-2xl font-bold ${DIFFICULTY_COLORS[d]}`}>{cnt}</p>
+                <p className={`text-lg sm:text-2xl font-bold ${DIFFICULTY_COLORS[d]}`}>{cnt}</p>
               </div>
-              <span className="text-2xl">{d === 'easy' ? '🌱' : d === 'medium' ? '🍀' : '🔥'}</span>
+              {d === 'easy' ? <FaSeedling className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" /> : d === 'medium' ? <FaLeaf className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" /> : <FaFire className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />}
             </div>
           )
         })}
@@ -500,9 +502,7 @@ function PuzzlesTab() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500" />
-        </div>
+        <SkeletonTable rows={6} cols={4} />
       ) : paged.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <BookOpenIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -515,44 +515,44 @@ function PuzzlesTab() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-800/80 text-gray-400 text-xs uppercase tracking-wider">
-                <th className="px-4 py-3 text-left">Prophet</th>
-                <th className="px-4 py-3 text-left">Difficulty</th>
-                <th className="px-4 py-3 text-center">Events</th>
-                <th className="px-4 py-3 text-left">Description</th>
-                <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-2 py-3 sm:px-4 text-left">Prophet</th>
+                <th className="px-2 py-3 sm:px-4 text-left">Difficulty</th>
+                <th className="px-2 py-3 sm:px-4 text-center hidden sm:table-cell">Events</th>
+                <th className="px-2 py-3 sm:px-4 text-left hidden lg:table-cell">Description</th>
+                <th className="px-2 py-3 sm:px-4 text-center hidden sm:table-cell">Status</th>
+                <th className="px-2 py-3 sm:px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {paged.map(puzzle => (
                 <tr key={puzzle._id} className="hover:bg-gray-800/40 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{puzzle.icon}</span>
+                  <td className="px-2 py-3 sm:px-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="text-lg sm:text-2xl">{puzzle.icon}</span>
                       <div>
-                        <p className="text-white font-medium">Prophet {puzzle.prophetName}</p>
+                        <p className="text-white font-medium text-xs sm:text-sm max-w-[110px] sm:max-w-none truncate">Prophet {puzzle.prophetName}</p>
                         {puzzle.prophetNameMl && <p className="text-gray-500 text-xs" dir="auto">{puzzle.prophetNameMl}</p>}
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-3 sm:px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${DIFFICULTY_BG[puzzle.difficulty] || 'bg-gray-700 text-gray-300'}`}>
                       {puzzle.difficulty}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-3 sm:px-4 text-center hidden sm:table-cell">
                     <span className="text-purple-400 font-semibold">{puzzle.events?.length ?? 0}</span>
                   </td>
-                  <td className="px-4 py-3 max-w-xs">
+                  <td className="px-2 py-3 sm:px-4 max-w-xs hidden lg:table-cell">
                     <p className="text-gray-400 truncate">{puzzle.description || '—'}</p>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-3 sm:px-4 text-center hidden sm:table-cell">
                     <span className={`text-xs px-2 py-1 rounded-full ${puzzle.isActive ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
                       {puzzle.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-2 py-3 sm:px-4">
+                    <div className="flex items-center justify-end gap-1 sm:gap-2">
                       <button onClick={() => setViewPuzzle(puzzle)}
                         className="p-1.5 text-gray-400 hover:text-purple-400 bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500/50"
                         title="View">
@@ -632,15 +632,14 @@ function LeaderboardTab() {
   }
 
   const rankBadge = (rank) => {
-    if (rank === 1) return '🥇'
-    if (rank === 2) return '🥈'
-    if (rank === 3) return '🥉'
-    return `#${rank}`
+    if (rank > 3) return `#${rank}`
+    const colors = ['text-yellow-400', 'text-gray-300', 'text-amber-600']
+    return <FaMedal className={`inline w-5 h-5 ${colors[rank - 1]}`} aria-label={`Rank ${rank}`} />
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <p className="text-gray-400 text-sm">{entries.length} player{entries.length !== 1 ? 's' : ''} on the board</p>
         <button onClick={fetchLeaderboard} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white bg-gray-800 px-3 py-2 rounded-xl border border-gray-700">
           <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
@@ -648,9 +647,7 @@ function LeaderboardTab() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500" />
-        </div>
+        <SkeletonTable rows={6} cols={4} />
       ) : entries.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <TrophyIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -662,13 +659,13 @@ function LeaderboardTab() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-800/80 text-gray-400 text-xs uppercase tracking-wider">
-                  <th className="px-4 py-3 text-left">Rank</th>
-                  <th className="px-4 py-3 text-left">Player</th>
-                  <th className="px-4 py-3 text-center">
+                  <th className="px-2 py-3 sm:px-4 text-left">Rank</th>
+                  <th className="px-2 py-3 sm:px-4 text-left">Player</th>
+                  <th className="px-2 py-3 sm:px-4 text-center">
                     <div className="flex items-center justify-center gap-1"><FiStar size={12} /> Stars</div>
                   </th>
-                  <th className="px-4 py-3 text-center">Puzzles Solved</th>
-                  <th className="px-4 py-3 text-right">
+                  <th className="px-2 py-3 sm:px-4 text-center">Puzzles Solved</th>
+                  <th className="px-2 py-3 sm:px-4 text-right">
                     <div className="flex items-center justify-end gap-1"><FiClock size={12} /> Total Time</div>
                   </th>
                 </tr>
@@ -680,25 +677,25 @@ function LeaderboardTab() {
                   return (
                     <tr key={entry._id || entry.firebaseUid || i}
                       className={`transition-colors ${isTop3 ? 'bg-purple-900/10' : 'hover:bg-gray-800/40'}`}>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-3 sm:px-4">
                         <span className={`font-bold text-lg ${isTop3 ? '' : 'text-gray-400 text-sm'}`}>
                           {rankBadge(rank)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-3 sm:px-4">
                         <p className="text-white font-medium">{entry.userName || entry.name || 'Anonymous'}</p>
                         {entry.firebaseUid && (
                           <p className="text-gray-600 text-xs font-mono truncate max-w-32">{entry.firebaseUid.slice(0, 12)}…</p>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-2 py-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-1">
                           <span className="text-yellow-400 font-bold">{entry.starsEarned ?? entry.totalStars ?? 0}</span>
-                          <span className="text-yellow-400 text-xs">⭐</span>
+                          <FiStar className="w-3 h-3 text-yellow-400" />
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center text-gray-300">{entry.puzzlesSolved ?? entry.completed ?? '—'}</td>
-                      <td className="px-4 py-3 text-right text-gray-400 font-mono text-xs">
+                      <td className="px-2 py-3 sm:px-4 text-center text-gray-300">{entry.puzzlesSolved ?? entry.completed ?? '—'}</td>
+                      <td className="px-2 py-3 sm:px-4 text-right text-gray-400 font-mono text-xs">
                         {formatTime(entry.timeSpentMs ?? entry.totalTimeMs)}
                       </td>
                     </tr>
@@ -735,15 +732,15 @@ function StoryPuzzle() {
   const [activeTab, setActiveTab] = useState('puzzles')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
-      <div className="ml-56">
+      <div className="ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Header */}
-        <div className="relative overflow-hidden bg-gray-900/60 border-b border-gray-800 px-8 py-6">
+        <div className="relative overflow-hidden bg-gray-900/60 border-b border-gray-800 px-4 sm:px-8 py-6">
           <img src={gradient} className="absolute right-0 top-0 h-full object-cover opacity-20 pointer-events-none" alt="" />
           <div className="relative flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-              📖
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded-xl flex items-center justify-center shadow-lg">
+              <BookOpenIcon className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-white text-2xl font-bold">Story Puzzle</h1>
@@ -752,12 +749,12 @@ function StoryPuzzle() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
           {/* Tabs */}
           <div className="flex gap-2 mb-6 bg-gray-800/40 p-1 rounded-xl w-fit border border-gray-700">
             {[
-              { key: 'puzzles', label: '📖 Puzzles', icon: BookOpenIcon },
-              { key: 'leaderboard', label: '🏆 Leaderboard', icon: TrophyIcon },
+              { key: 'puzzles', label: 'Puzzles', icon: BookOpenIcon },
+              { key: 'leaderboard', label: 'Leaderboard', icon: TrophyIcon },
             ].map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -765,7 +762,7 @@ function StoryPuzzle() {
                     ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg'
                     : 'text-gray-400 hover:text-white'
                 }`}>
-                {t.label}
+                <span className="inline-flex items-center gap-1.5"><t.icon className="w-4 h-4" /> {t.label}</span>
               </button>
             ))}
           </div>
