@@ -28,6 +28,7 @@ import Analytics from './pages/analytics'
 import HomeBanner from './pages/homeBanner'
 import Notices from './pages/notices'
 import Subscriptions from './pages/subscriptions'
+import Membership from './pages/membership'
 import Settings from './pages/settings'
 
 function App() {
@@ -277,6 +278,10 @@ function App() {
         <Route
           path="/subscriptions"
           element={isAuthenticated ? <Subscriptions /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/membership"
+          element={isAuthenticated ? <Membership /> : <Navigate to="/login" replace />}
         />
         <Route path="/quiz-test" element={<QuizTest />} />
         <Route 

@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 function Banners() {
   // State management
@@ -288,15 +289,15 @@ function Banners() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Banners
@@ -335,9 +336,7 @@ function Banners() {
         {/* Banners List */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           {loading && banners.length === 0 ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-white text-lg">Loading banners...</div>
-            </div>
+            <SkeletonCards count={6} />
           ) : banners.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 text-lg mb-6">No banners found</div>
@@ -350,7 +349,7 @@ function Banners() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
               {banners.map((banner) => (
                 <div 
                   key={banner._id}
@@ -393,7 +392,7 @@ function Banners() {
 
                   {/* Banner Info */}
                   <div className="p-4">
-                    <h3 className="text-white text-sm font-semibold truncate mb-1">
+                    <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">
                       {banner.title || 'Untitled Banner'}
                     </h3>
                     <div className="flex items-center justify-between mt-1">
@@ -429,7 +428,7 @@ function Banners() {
         {showForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4 overflow-y-auto">
             <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth my-auto">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   {editingBanner ? 'Edit Banner' : 'Add New Banner'}
                 </h2>
@@ -591,7 +590,7 @@ function Banners() {
           <img 
             src={gradient} 
             alt="Gradient" 
-            className="w-[800px] h-[800px] opacity-60"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           />
         </div>
 

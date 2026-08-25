@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import axios from 'axios'
+import { SkeletonCards } from '../components/Skeleton'
 import { 
   FiPlus, 
   FiX,
@@ -232,14 +233,14 @@ function Quizzes() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
       
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
-            <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
               Daily Quizzes
             </h1>
             <div className="flex items-center gap-3">
@@ -290,8 +291,8 @@ function Quizzes() {
           {showForm && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
               <div className="bg-gray-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                     <h2 className="text-2xl font-bold text-white">
                       {editingQuiz ? 'Edit Quiz' : 'Create New Quiz'}
                     </h2>
@@ -440,7 +441,7 @@ function Quizzes() {
                       </div>
                     </div>
 
-                    <div className="flex justify-end space-x-3 pt-4">
+                    <div className="flex flex-wrap justify-end gap-3 pt-4">
                       <button
                         type="button"
                         onClick={() => {
@@ -467,10 +468,7 @@ function Quizzes() {
 
           {/* Quizzes List */}
           {loading && !showForm ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading quizzes...</p>
-            </div>
+            <SkeletonCards count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
           ) : quizzes.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400">No quizzes found. Create your first quiz!</p>
@@ -479,10 +477,10 @@ function Quizzes() {
             <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quizzes.map((quiz) => (
-                <div key={quiz._id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                  <div className="flex justify-between items-start mb-4">
+                <div key={quiz._id} className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-2 sm:mb-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-1">{quiz.title}</h3>
+                      <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{quiz.title}</h3>
                       <p className="text-gray-400 text-sm mb-2">{quiz.mlTitle}</p>
                       <div className="flex items-center space-x-2 text-sm text-gray-400">
                         <FiCalendar className="w-4 h-4" />
@@ -502,13 +500,11 @@ function Quizzes() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <p className="text-gray-400 text-sm mb-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-gray-400 text-sm">
                       Questions: {quiz.questions?.length || 0}
                     </p>
-                  </div>
-
-                  <div className="flex justify-end space-x-2">
+                    <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(quiz)}
                       className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -521,6 +517,7 @@ function Quizzes() {
                     >
                       <FiTrash2 className="w-4 h-4" />
                     </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -528,8 +525,8 @@ function Quizzes() {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-8">
-                <p className="text-gray-400 text-sm">
+              <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 mt-8">
+                <p className="text-gray-400 text-sm text-center sm:text-left">
                   Showing {(currentPage - 1) * pagination.limit + 1}–{Math.min(currentPage * pagination.limit, pagination.total)} of {pagination.total} quizzes
                 </p>
                 <div className="flex items-center space-x-2">

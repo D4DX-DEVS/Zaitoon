@@ -62,9 +62,9 @@ function Notifications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64 h-screen overflow-y-auto scrollbar-hide">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 h-screen overflow-y-auto scrollbar-hide">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <h1
             className="text-3xl font-bold text-white mb-4"
@@ -76,7 +76,7 @@ function Notifications() {
             Send a push notification to all subscribed app users using OneSignal.
           </p>
 
-          <div className="bg-gray-900/80 border border-purple-500/30 rounded-2xl p-6">
+          <div className="bg-gray-900/80 border border-purple-500/30 rounded-2xl p-4 sm:p-6">
             {notificationStatus && (
               <div
                 className={`mb-4 rounded-lg px-4 py-2 text-sm ${

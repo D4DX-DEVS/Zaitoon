@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import axios from 'axios'
+import { SkeletonCards } from '../components/Skeleton'
 import {
   FiPlus,
   FiEdit3,
@@ -201,20 +202,20 @@ function QuizManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-wrap justify-between items-center gap-3 mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Archivo Black' }}>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Archivo Black' }}>
                 Quiz Management
               </h1>
               <p className="text-gray-400">Configure and manage your quiz programmes</p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={fetchConfigs}
                 className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -233,10 +234,7 @@ function QuizManagement() {
 
           {/* Config cards */}
           {loading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto" />
-              <p className="text-gray-400 mt-4">Loading configurations...</p>
-            </div>
+            <SkeletonCards count={4} className="grid grid-cols-1 lg:grid-cols-2 gap-6" />
           ) : configs.length === 0 ? (
             <div className="text-center py-20 bg-gray-800/50 rounded-xl border border-gray-700 border-dashed">
               <FiSettings className="w-14 h-14 text-gray-600 mx-auto mb-4" />
@@ -257,7 +255,7 @@ function QuizManagement() {
                 return (
                   <div key={cfg._id} className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col gap-4">
                     {/* Card header */}
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-wrap justify-between items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <h2 className="text-xl font-bold text-white truncate">{cfg.name}</h2>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">

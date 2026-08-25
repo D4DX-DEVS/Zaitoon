@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { SkeletonText } from '../components/Skeleton'
 
 function QuizTest() {
   // API_BASE_URL from env (likely includes /api already, like other pages)
@@ -489,7 +490,7 @@ function QuizTest() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
       <div className="text-white text-center">
-        {loading && <p>Loading...</p>}
+        {loading && <div className="w-80"><SkeletonText lines={4} /></div>}
         {!quiz && !loading && <p>No quiz available</p>}
       </div>
     </div>

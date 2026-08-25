@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import axios from 'axios'
+import { SkeletonDetail } from '../components/Skeleton'
 import { 
   FiArrowLeft,
   FiCheck,
@@ -73,14 +74,11 @@ function AttemptDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
         <Sidebar />
-        <div className="flex-1 ml-56">
+        <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading attempt details...</p>
-            </div>
+            <SkeletonDetail />
           </div>
         </div>
       </div>
@@ -89,9 +87,9 @@ function AttemptDetail() {
 
   if (!attempt) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
         <Sidebar />
-        <div className="flex-1 ml-56">
+        <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center py-12">
               <p className="text-gray-400">Attempt not found.</p>
@@ -113,13 +111,13 @@ function AttemptDetail() {
   const user = attempt.userId || attempt.userSnapshot || attempt.user || {}
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
       
-      <div className="flex-1 ml-56">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-6">
             <button
               onClick={() => navigate('/quiz-attempts')}
               className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -127,7 +125,7 @@ function AttemptDetail() {
               <FiArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 Attempt Details
               </h1>
               <p className="text-gray-400">Review quiz attempt and answers</p>
@@ -176,28 +174,28 @@ function AttemptDetail() {
                 <span>Score Summary</span>
               </h2>
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-3">
                   <span className="text-gray-400">Score</span>
                   <span className="text-2xl font-bold text-purple-400">{attempt.score || 0}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-3">
                   <span className="text-gray-400">Percentage</span>
                   <span className="text-xl font-bold text-white">
                     {attempt.percentage ? attempt.percentage.toFixed(2) : '0.00'}%
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-3">
                   <span className="text-gray-400">Total Questions</span>
                   <span className="text-white font-medium">{questions.length}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-3">
                   <span className="text-gray-400 flex items-center space-x-1">
                     <FiClock className="w-4 h-4" />
                     <span>Total Duration</span>
                   </span>
                   <span className="text-white font-medium">{formatTime(attempt.totalDuration)}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-3">
                   <span className="text-gray-400">Submitted At</span>
                   <span className="text-white text-sm">{formatDate(attempt.createdAt)}</span>
                 </div>
@@ -229,8 +227,8 @@ function AttemptDetail() {
                         : 'bg-red-500/10 border-red-500/50'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                      <div className="flex flex-wrap items-center gap-3">
                         <span className="px-3 py-1 bg-gray-700 text-white rounded-full text-sm font-medium">
                           Question {index + 1}
                         </span>
@@ -271,7 +269,7 @@ function AttemptDetail() {
                                 : 'bg-gray-700/50 border-gray-600'
                             }`}
                           >
-                            <div className="flex items-center space-x-3">
+                            <div className="flex flex-wrap items-center gap-3">
                               {isCorrectOption && (
                                 <FiCheck className="w-5 h-5 text-green-400" />
                               )}

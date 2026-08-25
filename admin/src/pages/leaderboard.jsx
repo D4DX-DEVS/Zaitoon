@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import axios from 'axios'
-import { 
+import { SkeletonTable } from '../components/Skeleton'
+import {
   FiAward,
   FiCalendar,
   FiRefreshCw,
@@ -11,8 +12,10 @@ import {
   FiChevronRight,
   FiX,
   FiEye,
-  FiClock
+  FiClock,
+  FiGlobe
 } from 'react-icons/fi'
+import { FaMedal } from 'react-icons/fa'
 
 const today = () => new Date().toISOString().split('T')[0]
 const LIMIT = 10
@@ -44,7 +47,7 @@ function Leaderboard() {
   const [globalLeaderboard, setGlobalLeaderboard] = useState([])
   const [globalPeriod, setGlobalPeriod] = useState('alltime')
   const [globalLoading, setGlobalLoading] = useState(false)
-  const [globalPage, setGlobalPage] = useState(1)
+  const [, setGlobalPage] = useState(1)
   const [globalPagination, setGlobalPagination] = useState({ total: 0, page: 1, totalPages: 1 })
 
   useEffect(() => {
@@ -238,14 +241,6 @@ function Leaderboard() {
     }
   }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return ''
-    if (typeof dateString === 'string' && (dateString.includes(' to ') || dateString === 'All time')) return dateString
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric'
-    })
-  }
-
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleString('en-US', {
@@ -262,23 +257,22 @@ function Leaderboard() {
   }
 
   const getRankIcon = (rank) => {
-    if (rank === 1) return '🥇'
-    if (rank === 2) return '🥈'
-    if (rank === 3) return '🥉'
-    return null
+    if (rank > 3) return null
+    const colors = ['text-yellow-400', 'text-gray-300', 'text-amber-600']
+    return <FaMedal className={`inline w-5 h-5 ${colors[rank - 1]}`} aria-label={`Rank ${rank}`} />
   }
 
   const isTotal = viewMode === 'byEmail'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
       
-      <div className="flex-1 ml-56">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-            <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
               Leaderboard
             </h1>
             <div className="flex flex-wrap items-center gap-3">
@@ -287,7 +281,7 @@ function Leaderboard() {
                 {[
                   { key: 'daily', label: 'Daily Quiz' },
                   { key: 'byEmail', label: 'Quiz Total' },
-                  { key: 'global', label: '🌍 Global' },
+                  { key: 'global', label: <span className="inline-flex items-center gap-1.5"><FiGlobe className="w-3.5 h-3.5" /> Global</span> },
                 ].map(tab => (
                   <button
                     key={tab.key}
@@ -405,10 +399,7 @@ function Leaderboard() {
                 </span>
               </div>
               {globalLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-                  <p className="text-gray-400 mt-4">Loading global leaderboard...</p>
-                </div>
+                <SkeletonTable rows={8} cols={5} />
               ) : globalLeaderboard.length === 0 ? (
                 <div className="text-center py-12">
                   <FiAward className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -423,14 +414,14 @@ function Leaderboard() {
                     <table className="w-full">
                       <thead className="bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quiz Pts</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Puzzle Pts</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quizzes</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Puzzles</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quiz Pts</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Puzzle Pts</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quizzes</th>
+                          <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Puzzles</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700">
@@ -441,30 +432,30 @@ function Leaderboard() {
                               entry.rank <= 3 ? 'bg-purple-900/20' : ''
                             }`}
                           >
-                            <td className="px-4 py-3 whitespace-nowrap">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                               <span className="text-lg font-bold text-white">
                                 {getRankIcon(entry.rank) || `#${entry.rank}`}
                               </span>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-white">{entry.name}</div>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                               {entry.userClass || 'N/A'}
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                               <span className="text-blue-400 font-semibold">{entry.quizPoints}</span>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                               <span className="text-orange-400 font-semibold">{entry.puzzlePoints}</span>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                               <span className="text-xl font-bold text-purple-400">{entry.totalPoints}</span>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-400">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-400">
                               {entry.quizAttempts}
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-400">
+                            <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-400">
                               {entry.puzzlesCompleted}
                             </td>
                           </tr>
@@ -473,7 +464,7 @@ function Leaderboard() {
                     </table>
                   </div>
                   {globalPagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-t border-gray-700">
+                    <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 px-4 py-3 bg-gray-800 border-t border-gray-700">
                       <p className="text-sm text-gray-400">Page {globalPagination.page} of {globalPagination.totalPages}</p>
                       <div className="flex items-center space-x-2">
                         <button
@@ -499,10 +490,7 @@ function Leaderboard() {
               )}
             </div>
           ) : loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading leaderboard...</p>
-            </div>
+            <SkeletonTable rows={8} cols={5} />
           ) : leaderboard.length === 0 ? (
             <div className="text-center py-12">
               <FiAward className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -522,19 +510,19 @@ function Leaderboard() {
                 <table className="w-full">
                   <thead className="bg-gray-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phone</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Score</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phone</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Score</th>
                       {viewMode === 'daily' && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Correct</th>
+                        <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Correct</th>
                       )}
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
                       {isTotal && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Attempts</th>
+                        <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Attempts</th>
                       )}
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Details</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Details</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700">
@@ -546,7 +534,7 @@ function Leaderboard() {
                         }`}
                         onClick={() => openUserDetail(entry)}
                       >
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
                             <span className="text-lg font-bold text-white">
                               {getRankIcon(entry.rank) || `#${entry.rank}`}
@@ -560,35 +548,35 @@ function Leaderboard() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-white">{entry.userName || ''}</div>
                           <div className="text-xs text-gray-400">{entry.userEmail || entry.email || ''}</div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {entry.userClass || 'N/A'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {entry.userPhone || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <span className="text-lg font-bold text-purple-400">
                             {entry.score ?? entry.totalScore ?? 0}
                           </span>
                         </td>
                         {viewMode === 'daily' && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                          <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                             {entry.percentage != null ? `${entry.percentage.toFixed(1)}%` : 'N/A'}
                           </td>
                         )}
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {formatTime(entry.totalDuration)}
                         </td>
                         {isTotal && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                          <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                             {entry.attemptsCount ?? '—'}
                           </td>
                         )}
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <button
                             onClick={(e) => { e.stopPropagation(); openUserDetail(entry) }}
                             className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-400 rounded hover:bg-blue-600/30 transition-colors text-xs"
@@ -605,7 +593,7 @@ function Leaderboard() {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-t border-gray-700">
+                <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 px-4 py-3 bg-gray-800 border-t border-gray-700">
                   <p className="text-sm text-gray-400">
                     Page {pagination.page} of {pagination.totalPages}
                   </p>
@@ -649,7 +637,7 @@ function Leaderboard() {
                   <p className="text-sm text-gray-500">{selectedUser.userPhone}</p>
                 )}
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="text-right">
                   <p className="text-xs text-gray-500">Total Score</p>
                   <p className="text-2xl font-bold text-purple-400">{selectedUser.score ?? selectedUser.totalScore ?? 0}</p>
@@ -667,8 +655,7 @@ function Leaderboard() {
               </h4>
               {userAttemptsLoading ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
-                  <p className="text-gray-500 mt-3 text-sm">Loading attempts...</p>
+                  <SkeletonTable rows={4} cols={4} />
                 </div>
               ) : userAttempts.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-8">No attempts found.</p>
@@ -677,7 +664,7 @@ function Leaderboard() {
                   {userAttempts.map((attempt, i) => (
                     <div key={attempt.attemptId || i}
                       className="flex items-center justify-between bg-gray-800 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600 transition-colors">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex flex-wrap items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center text-sm font-bold text-purple-400">
                           {i + 1}
                         </div>

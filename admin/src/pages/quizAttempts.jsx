@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import axios from 'axios'
+import { SkeletonTable } from '../components/Skeleton'
 import { 
   FiAward,
   FiRefreshCw,
@@ -15,8 +16,8 @@ import {
   FiChevronRight,
   FiX
 } from 'react-icons/fi'
+import { FaMedal } from 'react-icons/fa'
 
-const today = () => new Date().toISOString().split('T')[0]
 const LIMIT = 10
 
 function QuizAttempts() {
@@ -189,15 +190,15 @@ function QuizAttempts() {
 
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
       
-      <div className="flex-1 ml-56">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Archivo Black' }}>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Archivo Black' }}>
                 Quiz Attempts
               </h1>
               <p className="text-gray-400 text-sm">View and manage all quiz attempts</p>
@@ -279,19 +280,19 @@ function QuizAttempts() {
               )}
             </div>
 
-            {/* Date range */}
-            <div className="flex items-center space-x-2">
-              <FiCalendar className="w-4 h-4 text-gray-400" />
+            {/* Date range + Apply */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0 hidden sm:block" />
               <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-                className="px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500" />
-              <span className="text-gray-500 text-sm">to</span>
+                className="flex-1 sm:flex-initial min-w-0 px-2 sm:px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500" />
+              <span className="text-gray-500 text-sm flex-shrink-0">to</span>
               <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-                className="px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500" />
+                className="flex-1 sm:flex-initial min-w-0 px-2 sm:px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500" />
+              <button onClick={handleApplyDateRange}
+                className="flex-shrink-0 px-3 sm:px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors">
+                Apply
+              </button>
             </div>
-            <button onClick={handleApplyDateRange}
-              className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors">
-              Apply
-            </button>
             {(fromDate || toDate) && (
               <button onClick={handleClearDates}
                 className="px-3 py-2 bg-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-600 transition-colors">
@@ -302,10 +303,7 @@ function QuizAttempts() {
 
           {/* Table */}
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading attempts...</p>
-            </div>
+            <SkeletonTable rows={8} cols={5} />
           ) : attendees.length === 0 ? (
             <div className="text-center py-12">
               <FiAward className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -318,19 +316,54 @@ function QuizAttempts() {
               <div className="px-4 py-2 bg-gray-700/50 text-sm text-gray-400">
                 Showing {(pagination.page - 1) * LIMIT + 1}–{Math.min(pagination.page * LIMIT, pagination.total)} of {pagination.total} attempt(s)
               </div>
-              <div className="overflow-x-auto">
+              {/* Mobile: card list -> tap for detail */}
+              <div className="md:hidden divide-y divide-gray-700">
+                {attendees.map((attendee) => (
+                  <div
+                    key={attendee.attemptId}
+                    onClick={() => handleViewDetails(attendee.attemptId)}
+                    className={`flex items-center gap-3 px-3 py-3 active:bg-gray-700/50 cursor-pointer ${attendee.rank <= 3 ? 'bg-purple-900/20' : ''}`}
+                  >
+                    <span className="text-base font-bold text-white w-9 flex-shrink-0 text-center">
+                      {attendee.rank <= 3 ? (
+                        <FaMedal className={`inline w-4 h-4 ${['text-yellow-400', 'text-gray-300', 'text-amber-600'][attendee.rank - 1]}`} aria-label={`Rank ${attendee.rank}`} />
+                      ) : `#${attendee.rank}`}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{attendee.userName || ''}</p>
+                      <p className="text-xs text-gray-400 truncate">{attendee.userClass || 'N/A'} · {formatDate(attendee.createdAt)}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-base font-bold text-purple-400">{attendee.score}</p>
+                      <p className="text-xs text-gray-400">{attendee.percentage != null ? `${attendee.percentage.toFixed(1)}%` : 'N/A'}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteAttempt(attendee.attemptId) }}
+                      disabled={deletingId === attendee.attemptId}
+                      className="p-2 text-red-400/80 hover:text-red-400 flex-shrink-0"
+                    >
+                      {deletingId === attendee.attemptId
+                        ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-400" />
+                        : <FiTrash2 className="w-4 h-4" />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: full table */}
+              <div className="overflow-x-auto hidden md:block">
                 <table className="w-full">
                   <thead className="bg-gray-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phone</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Score</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Percentage</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Submitted At</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phone</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Score</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Percentage</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Submitted At</th>
+                      <th className="px-2 py-3 sm:px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700">
@@ -341,10 +374,12 @@ function QuizAttempts() {
                           attendee.rank <= 3 ? 'bg-purple-900/20' : ''
                         }`}
                       >
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
                             <span className="text-lg font-bold text-white">
-                              {attendee.rank <= 3 ? ['🥇', '🥈', '🥉'][attendee.rank - 1] : `#${attendee.rank}`}
+                              {attendee.rank <= 3 ? (
+                                <FaMedal className={`inline w-5 h-5 ${['text-yellow-400', 'text-gray-300', 'text-amber-600'][attendee.rank - 1]}`} aria-label={`Rank ${attendee.rank}`} />
+                              ) : `#${attendee.rank}`}
                             </span>
                             {attendee.rank <= 3 && (
                               <FiAward className={`w-4 h-4 ${
@@ -355,32 +390,32 @@ function QuizAttempts() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-white">{attendee.userName || ''}</div>
                           <div className="text-xs text-gray-400">{attendee.userEmail || ''}</div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {attendee.userClass || 'N/A'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {attendee.userPhone || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <span className="text-lg font-bold text-purple-400">{attendee.score}</span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {attendee.percentage != null ? `${attendee.percentage.toFixed(1)}%` : 'N/A'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           <div className="flex items-center space-x-1">
                             <FiClock className="w-3 h-3" />
                             <span>{formatTime(attendee.totalDuration)}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap text-sm text-gray-300">
                           {formatDate(attendee.createdAt)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 sm:px-4 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleViewDetails(attendee.attemptId)}
@@ -411,7 +446,7 @@ function QuizAttempts() {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-t border-gray-700">
+                <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 px-4 py-3 bg-gray-800 border-t border-gray-700">
                   <p className="text-sm text-gray-400">
                     Page {pagination.page} of {pagination.totalPages}
                   </p>

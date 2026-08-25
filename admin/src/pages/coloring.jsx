@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 const CATEGORIES = ['mosque', 'nature', 'calligraphy', 'animals', 'ramadan', 'patterns', 'characters', 'general']
 const DIFFICULTIES = ['easy', 'medium', 'hard']
@@ -283,15 +284,15 @@ function Coloring() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Painting & Coloring
@@ -304,7 +305,7 @@ function Coloring() {
               </h1>
               <p className="text-gray-400 text-sm mt-3">Manage coloring book images for the kids painting feature</p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-3">
               {/* Category filter */}
               <select
                 value={filterCategory}
@@ -341,7 +342,7 @@ function Coloring() {
 
         {/* Stats bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-4">
             <div className="bg-gray-900/60 border border-gray-700 rounded-xl px-4 py-2">
               <span className="text-gray-400 text-xs">Total</span>
               <p className="text-white text-lg font-bold">{images.length}</p>
@@ -360,9 +361,7 @@ function Coloring() {
         {/* Images Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           {loading && images.length === 0 ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-white text-lg">Loading coloring images...</div>
-            </div>
+            <SkeletonCards count={8} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" />
           ) : images.length === 0 ? (
             <div className="text-center py-20">
               <FiImage className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -376,7 +375,7 @@ function Coloring() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
               {images.map((img) => (
                 <div
                   key={img._id}
@@ -436,10 +435,10 @@ function Coloring() {
 
                   {/* Info */}
                   <div className="p-3">
-                    <h3 className="text-white text-sm font-semibold truncate mb-1">
+                    <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">
                       {img.title || 'Untitled'}
                     </h3>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <span className="text-xs text-purple-400 capitalize">{img.category}</span>
                       <div className="flex items-center space-x-1 text-xs text-gray-400">
                         <HiCalendar className="w-3 h-3" />
@@ -474,7 +473,7 @@ function Coloring() {
         {showForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4 overflow-y-auto">
             <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth my-auto">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   {editingImage ? 'Edit Coloring Image' : 'Add New Coloring Image'}
                 </h2>
@@ -517,7 +516,7 @@ function Coloring() {
                 </div>
 
                 {/* Category & Difficulty row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-white text-sm font-semibold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                       Category *
@@ -549,7 +548,7 @@ function Coloring() {
                 </div>
 
                 {/* Sort Order & Active row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-white text-sm font-semibold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                       Sort Order
@@ -711,7 +710,7 @@ function Coloring() {
           <img
             src={gradient}
             alt="Gradient"
-            className="w-[800px] h-[800px] opacity-60"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           />
         </div>
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { FiAward, FiBook, FiStar } from "react-icons/fi";
 
 const THEME = { primary: "#7C3AED" };
 
@@ -26,21 +27,21 @@ function ActivityStats({ stats: statsProp, users = [] }) {
       label: "Total current streaks",
       value: totalStreakCurrent,
       sub: `${activeStreakUsers} users with active streak`,
-      icon: "🏆",
+      icon: FiAward,
       color: THEME.primary,
     },
     {
       label: "Books read (all users)",
       value: totalBooksRead,
       sub: "Completed books",
-      icon: "📚",
+      icon: FiBook,
       color: THEME.primary,
     },
     {
       label: "Achievements",
       value: totalAchievements,
       sub: "Placeholder for future badges",
-      icon: "🏅",
+      icon: FiStar,
       color: THEME.primary,
     },
   ];
@@ -65,9 +66,7 @@ function ActivityStats({ stats: statsProp, users = [] }) {
                 <p className="text-gray-500 text-xs mt-1">{card.sub}</p>
               )}
             </div>
-            <span className="text-3xl" aria-hidden>
-              {card.icon}
-            </span>
+            <card.icon className="w-7 h-7" style={{ color: card.color }} aria-hidden />
           </div>
         </div>
       ))}

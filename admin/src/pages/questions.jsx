@@ -3,13 +3,15 @@ import { useSearchParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
 import axios from 'axios'
+import { SkeletonCards } from '../components/Skeleton'
 import { 
   FiPlus, 
   FiX,
   FiEdit3,
   FiTrash2,
   FiCheck,
-  FiXCircle
+  FiXCircle,
+  FiChevronDown,
 } from 'react-icons/fi'
 
 function Questions() {
@@ -30,6 +32,7 @@ function Questions() {
     totalPages: 1
   })
   const [currentPage, setCurrentPage] = useState(1)
+  const [expandedId, setExpandedId] = useState(null)
   const [configs, setConfigs] = useState([])
   const [filterConfigId, setFilterConfigId] = useState(configIdFromUrl)
 
@@ -88,7 +91,7 @@ function Questions() {
           setCurrentPage(pageToLoad)
         }
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Failed to fetch questions')
     } finally {
       setLoading(false)
@@ -161,7 +164,7 @@ function Questions() {
       const method = editingQuestion ? 'put' : 'post'
       
       // Strip UI-only field before sending to API
-      const { optionCount, ...payload } = formData
+      const { optionCount: _optionCount, ...payload } = formData
 
       const response = await axios[method](url, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -240,15 +243,15 @@ function Questions() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
       <Sidebar />
       
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 Question Bank
               </h1>
               {(configNameFromUrl || filterConfigId) && (
@@ -259,7 +262,7 @@ function Questions() {
                 </p>
               )}
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {configs.length > 0 && !configIdFromUrl && (
                 <select
                   value={filterConfigId}
@@ -268,7 +271,7 @@ function Questions() {
                     setFilterConfigId(newId)
                     fetchQuestions(1, newId)
                   }}
-                  className="px-3 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="flex-1 sm:flex-initial min-w-0 px-3 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                 >
                   <option value="">All Quizzes</option>
                   {configs.map(c => (
@@ -281,7 +284,7 @@ function Questions() {
                   resetForm()
                   setShowForm(true)
                 }}
-                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex-shrink-0 flex items-center space-x-2 px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
               >
                 <FiPlus className="w-5 h-5" />
                 <span>Add Question</span>
@@ -293,8 +296,8 @@ function Questions() {
           {showForm && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
               <div className="bg-gray-800 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                     <h2 className="text-2xl font-bold text-white">
                       {editingQuestion ? 'Edit Question' : 'Create New Question'}
                     </h2>
@@ -480,7 +483,7 @@ function Questions() {
                       </div>
                     </div>
 
-                    <div className="flex justify-end space-x-3 pt-4">
+                    <div className="flex flex-wrap justify-end gap-3 pt-4">
                       <button
                         type="button"
                         onClick={() => {
@@ -507,10 +510,7 @@ function Questions() {
 
           {/* Questions List */}
           {loading && !showForm ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading questions...</p>
-            </div>
+            <SkeletonCards count={4} className="space-y-4" />
           ) : questions.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400">No questions found. Create your first question!</p>
@@ -519,10 +519,18 @@ function Questions() {
             <>
               <div className="space-y-4">
                 {questions.map((question) => (
-                  <div key={question._id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                    <div className="flex justify-between items-start mb-4">
+                  <div
+                    key={question._id}
+                    onClick={() => setExpandedId(prev => (prev === question._id ? null : question._id))}
+                    className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 md:cursor-default cursor-pointer"
+                  >
+                    <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white mb-2">{question.questionText}</h3>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-base sm:text-lg font-semibold text-white mb-2">{question.questionText}</h3>
+                          <FiChevronDown className={`md:hidden w-5 h-5 mt-1 flex-shrink-0 text-gray-400 transition-transform ${expandedId === question._id ? 'rotate-180' : ''}`} />
+                        </div>
+                        <div className={`${expandedId === question._id ? 'block' : 'hidden'} md:block`}>
                         <p className="text-gray-400 text-sm mb-4">{question.mlQuestionText}</p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -550,7 +558,7 @@ function Questions() {
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                           <span className="text-gray-400">
                             Points: <span className="text-white">{question.points}</span>
                           </span>
@@ -568,10 +576,11 @@ function Questions() {
                             </span>
                           )}
                         </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex justify-end space-x-2">
+                    <div className={`${expandedId === question._id ? 'flex' : 'hidden'} md:flex justify-end space-x-2`} onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEdit(question)}
                         className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"

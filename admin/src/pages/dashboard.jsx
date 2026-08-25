@@ -14,6 +14,7 @@ import {
 import axios from 'axios'
 import logo from '../assets/logo.png'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonStats, SkeletonCards, SkeletonText } from '../components/Skeleton'
 
 function Dashboard() {
   const resolveMediaUrl = (url) => {
@@ -382,7 +383,7 @@ function Dashboard() {
     return (
       <div 
         onClick={onClick}
-        className="relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 hover:scale-105 hover:shadow-2xl border-transparent hover:border-violet-500 w-[180px] h-[220px]"
+        className="relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 hover:scale-105 hover:shadow-2xl border-transparent hover:border-violet-500 w-[88px] h-[118px] sm:w-[130px] sm:h-[168px] md:w-[180px] md:h-[220px]"
       >
         {/* Full Card - Gradient Background */}
         <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-violet-600/20 to-purple-600/20 flex items-center justify-center">
@@ -411,7 +412,7 @@ function Dashboard() {
       <div key={item._id}>
         {/* Content Card */}
         <div 
-          className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-[180px] h-[220px] ${
+          className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-[88px] h-[118px] sm:w-[130px] sm:h-[168px] md:w-[180px] md:h-[220px] ${
             isThisCardExpanded || isThisSingleStoryExpanded || isThisVideoExpanded
               ? 'scale-110 z-10 shadow-2xl border-blue-500' 
               : 'hover:scale-105 hover:shadow-2xl border-transparent hover:border-gray-600'
@@ -464,12 +465,12 @@ function Dashboard() {
             )}
             
             {/* Title Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 z-10">
-              <h3 className="text-white text-base font-semibold truncate mb-1">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 sm:p-2 md:p-3 z-10">
+              <h3 className="text-white text-[10px] sm:text-sm md:text-base font-semibold truncate mb-0.5 md:mb-1">
                 {item.title || item.mlTitle || 'Untitled'}
               </h3>
               {item.mlTitle && item.title !== item.mlTitle && (
-                <p className="text-gray-300 text-sm truncate">
+                <p className="text-gray-300 text-[9px] sm:text-xs md:text-sm truncate">
                   {item.mlTitle}
                 </p>
               )}
@@ -502,13 +503,11 @@ function Dashboard() {
               }}
             >
               {!currentStory.description ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-white text-lg">Loading details...</div>
-                </div>
+                <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
               ) : (
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {/* Header with Close Button */}
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                     <div className="flex-1">
                       <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                         {currentStory.title}
@@ -581,7 +580,7 @@ function Dashboard() {
 
                   {/* Seasons & Episodes */}
                   <div className="mb-3">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                       <h3 className="text-white text-lg font-semibold" style={{ fontFamily: 'Archivo Black' }}>
                         Seasons & Episodes
                       </h3>
@@ -611,8 +610,8 @@ function Dashboard() {
                           const selectedSeason = currentStory.seasons.find(s => s._id === selectedSeasonId);
                           return selectedSeason ? (
                             <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-3">
+                              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                <div className="flex flex-wrap items-center gap-3">
                                   {selectedSeason.seasonBanner && (
                                     <img
                                       src={resolveMediaUrl(selectedSeason.seasonBanner)}
@@ -637,8 +636,8 @@ function Dashboard() {
                                   {sortEpisodesAsc(selectedSeason.episodes).map((episode) => (
                                     <div key={episode._id} className="bg-gray-700/20 backdrop-blur-sm rounded-lg p-3 cursor-pointer hover:bg-gray-700/30 transition duration-200"
                                          onClick={() => handleEpisodeSelect(episode)}>
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
+                                      <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <div className="flex flex-wrap items-center gap-3">
                                           {episode.coverImage && (
                                             <img
                                               src={resolveMediaUrl(episode.coverImage)}
@@ -737,13 +736,11 @@ function Dashboard() {
               }}
             >
               {!currentSingleStory.description ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-white text-lg">Loading details...</div>
-                </div>
+                <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
               ) : (
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {/* Header with Close Button */}
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                     <div className="flex-1">
                       <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                         {currentSingleStory.title}
@@ -910,13 +907,11 @@ function Dashboard() {
               }}
             >
               {!currentVideo.title ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-white text-lg">Loading details...</div>
-                </div>
+                <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
               ) : (
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {/* Header with Close Button */}
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                     <div className="flex-1">
                       <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                         {currentVideo.title}
@@ -958,7 +953,7 @@ function Dashboard() {
                       {currentVideo.category && (
                         <div className="bg-gray-800/50 rounded-lg p-3">
                           <span className="text-gray-400 text-xs mb-2 block">Category</span>
-                          <div className="flex items-center space-x-3">
+                          <div className="flex flex-wrap items-center gap-3">
                             {currentVideo.category.image && (
                               <img
                                 src={resolveMediaUrl(currentVideo.category.image)}
@@ -999,13 +994,13 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
         <Sidebar />
-        <div className="flex-1 ml-64">
+        <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-400 mt-4">Loading content...</p>
+            <div className="space-y-8">
+              <SkeletonStats count={4} />
+              <SkeletonCards count={6} />
             </div>
           </div>
         </div>
@@ -1015,9 +1010,9 @@ function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-clip">
         <Sidebar />
-        <div className="flex-1 ml-64">
+        <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
               <p className="text-red-400">{error}</p>
@@ -1040,14 +1035,14 @@ function Dashboard() {
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 ml-64 h-screen overflow-y-auto scrollbar-hide">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0 h-screen overflow-y-auto scrollbar-hide">
         <div className="max-w-7xl mx-auto px-2 py-6">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h1 
-                  className="text-4xl font-bold text-white mb-2"
+                  className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2"
                   style={{ fontFamily: 'Archivo Black' }}
                 >
                   Admin Dashboard
@@ -1061,7 +1056,7 @@ function Dashboard() {
             <div className="mb-3">
               <h2 
                 onClick={() => navigate('/stories')}
-                className="text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
+                className="text-lg sm:text-xl md:text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
               >
                 Stories
                 <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
@@ -1073,7 +1068,7 @@ function Dashboard() {
               onMouseEnter={() => handleMouseEnter(storiesScrollRef, 'stories')}
               onMouseLeave={() => handleMouseLeave(storiesScrollRef, 'stories')}
             >
-              <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
+              <div className="flex gap-2 sm:gap-3 md:gap-4 pb-4" style={{ width: 'max-content' }}>
                 {stories.slice(0, 8).map((story) => (
                   <ContentCard
                     key={story._id}
@@ -1100,7 +1095,7 @@ function Dashboard() {
             <div className="mb-3">
               <h2 
             onClick={() => navigate('/single-stories')}
-                className="text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
+                className="text-lg sm:text-xl md:text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
               >
                 Single Stories
                 <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
@@ -1112,7 +1107,7 @@ function Dashboard() {
               onMouseEnter={() => handleMouseEnter(singleStoriesScrollRef, 'singleStories')}
               onMouseLeave={() => handleMouseLeave(singleStoriesScrollRef, 'singleStories')}
             >
-              <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
+              <div className="flex gap-2 sm:gap-3 md:gap-4 pb-4" style={{ width: 'max-content' }}>
                 {singleStories.slice(0, 8).map((singleStory) => (
                   <ContentCard
                     key={singleStory._id}
@@ -1139,7 +1134,7 @@ function Dashboard() {
             <div className="mb-3">
               <h2 
                 onClick={() => navigate('/videos')}
-                className="text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
+                className="text-lg sm:text-xl md:text-2xl font-semibold text-white cursor-pointer hover:text-violet-400 transition duration-200 group flex items-center"
               >
                 Videos
                 <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
@@ -1151,7 +1146,7 @@ function Dashboard() {
               onMouseEnter={() => handleMouseEnter(videosScrollRef, 'videos')}
               onMouseLeave={() => handleMouseLeave(videosScrollRef, 'videos')}
             >
-              <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
+              <div className="flex gap-2 sm:gap-3 md:gap-4 pb-4" style={{ width: 'max-content' }}>
                 {videos.slice(0, 8).map((video) => (
                   <ContentCard
                     key={video._id}
@@ -1189,9 +1184,9 @@ function Dashboard() {
               e.stopPropagation()
             }}
           >
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Header with Close Button */}
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                 <div className="flex-1">
                   <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                     {selectedEpisode.title}
@@ -1454,7 +1449,7 @@ function Dashboard() {
         <img 
           src={gradient} 
           alt="Gradient" 
-          className="w-[800px] h-[800px] opacity-60"
+          className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           loading="lazy"
         />
       </div>

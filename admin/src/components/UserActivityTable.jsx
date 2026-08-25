@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { FiAward, FiBook, FiStar } from "react-icons/fi";
 import { deleteUserActivity } from "../services/activityService";
 import StatusModal from "./SuccessModal";
+import { SkeletonTable } from './Skeleton'
 
 const THEME = { primary: "#7C3AED" };
 
@@ -48,13 +50,7 @@ function UserActivityTable({ users = [], loading = false, error = null, onDelete
   };
   if (loading) {
     return (
-      <div className="rounded-xl border border-violet-500/30 bg-gray-900/80 backdrop-blur-sm p-8 text-center">
-        <div
-          className="animate-spin rounded-full h-10 w-10 border-2 border-t-transparent mx-auto"
-          style={{ borderColor: THEME.primary }}
-        />
-        <p className="text-gray-400 mt-3">Loading activity...</p>
-      </div>
+      <SkeletonTable rows={6} cols={5} />
     );
   }
 
@@ -84,10 +80,10 @@ function UserActivityTable({ users = [], loading = false, error = null, onDelete
               style={{ backgroundColor: `${THEME.primary}15` }}
             >
               <th className="py-3 px-4">User</th>
-              <th className="py-3 px-4">🏆 Streak</th>
+              <th className="py-3 px-4"><span className="inline-flex items-center gap-1.5"><FiAward className="w-3.5 h-3.5 text-yellow-400" /> Streak</span></th>
               <th className="py-3 px-4">Longest</th>
-              <th className="py-3 px-4">📚 Books read</th>
-              <th className="py-3 px-4">🏅 Achievements</th>
+              <th className="py-3 px-4"><span className="inline-flex items-center gap-1.5"><FiBook className="w-3.5 h-3.5 text-blue-400" /> Books read</span></th>
+              <th className="py-3 px-4"><span className="inline-flex items-center gap-1.5"><FiStar className="w-3.5 h-3.5 text-purple-400" /> Achievements</span></th>
               <th className="py-3 px-4">Last active</th>
               <th className="py-3 px-4">Actions</th>
             </tr>

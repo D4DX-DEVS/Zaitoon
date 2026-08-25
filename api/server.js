@@ -30,6 +30,7 @@ const brightBoxStoryRoutes = require("./routes/brightBoxStory");
 const supportRoutes = require("./routes/support");
 const supportWebhookRoutes = require("./routes/supportWebhook");
 const subscriptionRoutes = require("./routes/subscription");
+const membershipRoutes = require("./routes/membership");
 const subscriptionWebhookRoutes = require("./routes/subscriptionWebhook");
 const puzzlesRoutes = require("./routes/puzzles");
 const bannerRoutes = require("./routes/banner");
@@ -130,6 +131,7 @@ app.use("/api", seasonRoutes);
 app.use("/api", episodeRoutes);
 app.use("/api", supportRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/memberships", membershipRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/app-config", appConfigRoutes);
 

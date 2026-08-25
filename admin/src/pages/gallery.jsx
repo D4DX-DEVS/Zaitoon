@@ -14,6 +14,7 @@ import {
   FiFolder,
 } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
+import { SkeletonCards } from '../components/Skeleton'
 
 function Gallery() {
   const [albums, setAlbums] = useState([])
@@ -344,17 +345,17 @@ function Gallery() {
   )
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* ─── LIST VIEW ─────────────────────────────────── */}
         {view === 'list' && (
           <>
             {/* Header */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-wrap justify-between items-center gap-3">
                 <div>
-                  <h1 className="text-white text-5xl font-bold mb-1 relative" style={{ fontFamily: 'Archivo Black' }}>
+                  <h1 className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative" style={{ fontFamily: 'Archivo Black' }}>
                     Gallery
                     <div
                       className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 w-48"
@@ -380,7 +381,7 @@ function Gallery() {
 
             {/* Stats */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap gap-4">
                 <div className="bg-gray-900/60 border border-gray-700 rounded-xl px-4 py-2">
                   <span className="text-gray-400 text-xs">Folders</span>
                   <p className="text-white text-lg font-bold">{totalAlbums}</p>
@@ -399,9 +400,7 @@ function Gallery() {
             {/* Folders grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
               {loading && albums.length === 0 ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="text-white text-lg">Loading folders...</div>
-                </div>
+                <SkeletonCards count={8} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" />
               ) : albums.length === 0 ? (
                 <div className="text-center py-20">
                   <FiFolder className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -473,9 +472,9 @@ function Gallery() {
                         </div>
 
                         <div className="p-3">
-                          <h3 className="text-white text-sm font-semibold truncate mb-1">{album.title || 'Untitled'}</h3>
+                          <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">{album.title || 'Untitled'}</h3>
                           {album.titleMl && <p className="text-gray-400 text-xs truncate mb-1">{album.titleMl}</p>}
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
                             <span className="text-xs text-purple-400">{count} photo{count !== 1 ? 's' : ''}</span>
                             <div className="flex items-center space-x-1 text-xs text-gray-400">
                               <HiCalendar className="w-3 h-3" />
@@ -504,7 +503,7 @@ function Gallery() {
             </button>
 
             {/* Folder header: title + description on top */}
-            <div className="bg-gray-900/60 border border-gray-700 rounded-2xl p-6 mb-6">
+            <div className="bg-gray-900/60 border border-gray-700 rounded-2xl p-4 sm:p-6 mb-6">
               <div className="flex justify-between items-start gap-4">
                 <div className="min-w-0">
                   <h1 className="text-white text-3xl font-bold mb-1 break-words" style={{ fontFamily: 'Archivo Black' }}>
@@ -581,8 +580,8 @@ function Gallery() {
         {/* ─── CREATE FOLDER MODAL ───────────────────────── */}
         {showCreate && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4 overflow-y-auto">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>New Folder</h2>
                 <button onClick={resetForm} className="text-gray-400 hover:text-white transition"><FiX className="w-6 h-6" /></button>
               </div>
@@ -647,8 +646,8 @@ function Gallery() {
         {/* ─── EDIT FOLDER MODAL ─────────────────────────── */}
         {showEdit && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4 overflow-y-auto">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>Edit Folder</h2>
                 <button onClick={resetForm} className="text-gray-400 hover:text-white transition"><FiX className="w-6 h-6" /></button>
               </div>
@@ -690,7 +689,7 @@ function Gallery() {
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <label className="text-white text-sm font-semibold" style={{ fontFamily: 'Archivo Black' }}>Active</label>
                   <button
                     type="button"
@@ -716,8 +715,8 @@ function Gallery() {
         {/* ─── ADD IMAGES MODAL ──────────────────────────── */}
         {showAddImages && openAlbum && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4 overflow-y-auto">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide my-auto">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>Add Images</h2>
                 <button onClick={resetForm} className="text-gray-400 hover:text-white transition"><FiX className="w-6 h-6" /></button>
               </div>

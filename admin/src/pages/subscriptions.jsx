@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Sidebar from '../components/Sidebar'
 import StatusModal from '../components/SuccessModal'
+import { SkeletonCards, SkeletonTable } from '../components/Skeleton'
 import {
   getPlans,
   createPlan,
@@ -152,9 +153,9 @@ function Subscriptions() {
   const fmtRupees = (paise) => `₹${((paise || 0) / 100).toLocaleString('en-IN')}`
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-extrabold">Subscriptions</h1>
@@ -163,22 +164,22 @@ function Subscriptions() {
 
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-gray-900/70 border border-emerald-500/20 rounded-2xl p-5">
+            <div className="bg-gray-900/70 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
               <p className="text-gray-400 text-sm">Paid</p>
               <p className="text-2xl font-bold text-emerald-300">{summary.paid || 0}</p>
             </div>
-            <div className="bg-gray-900/70 border border-yellow-500/20 rounded-2xl p-5">
+            <div className="bg-gray-900/70 border border-yellow-500/20 rounded-2xl p-4 sm:p-5">
               <p className="text-gray-400 text-sm">Pending</p>
               <p className="text-2xl font-bold text-yellow-300">{summary.created || 0}</p>
             </div>
-            <div className="bg-gray-900/70 border border-red-500/20 rounded-2xl p-5">
+            <div className="bg-gray-900/70 border border-red-500/20 rounded-2xl p-4 sm:p-5">
               <p className="text-gray-400 text-sm">Failed</p>
               <p className="text-2xl font-bold text-red-300">{summary.failed || 0}</p>
             </div>
           </div>
 
           {/* Plans */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 className="text-xl font-bold">Plans</h2>
             <button
               onClick={openCreatePlan}
@@ -189,14 +190,14 @@ function Subscriptions() {
           </div>
 
           {plansLoading ? (
-            <p className="text-gray-400 mb-10">Loading plans...</p>
+            <SkeletonCards count={3} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10" />
           ) : plans.length === 0 ? (
             <p className="text-gray-400 mb-10">No plans yet. Add one to get started.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
               {plans.map((plan) => (
-                <div key={plan._id} className="bg-gray-900/70 border border-purple-500/20 rounded-2xl p-5">
-                  <div className="flex items-start justify-between">
+                <div key={plan._id} className="bg-gray-900/70 border border-purple-500/20 rounded-2xl p-4 sm:p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-bold">{plan.name}</h3>
                       <p className="text-gray-400 text-sm">{plan.description || '—'}</p>
@@ -268,7 +269,7 @@ function Subscriptions() {
 
           <div className="bg-gray-900/70 border border-purple-500/20 rounded-2xl overflow-hidden">
             {subsLoading ? (
-              <p className="text-gray-400 p-6">Loading subscriptions...</p>
+              <div className="p-4 sm:p-6"><SkeletonTable rows={6} cols={5} /></div>
             ) : subscriptions.length === 0 ? (
               <p className="text-gray-400 p-6">No subscriptions found.</p>
             ) : (
@@ -276,34 +277,34 @@ function Subscriptions() {
                 <table className="w-full text-sm">
                   <thead className="bg-black/30 text-gray-400 text-left">
                     <tr>
-                      <th className="px-4 py-3">User</th>
-                      <th className="px-4 py-3">Plan</th>
-                      <th className="px-4 py-3">Amount</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Start</th>
-                      <th className="px-4 py-3">End</th>
-                      <th className="px-4 py-3">Order ID</th>
-                      <th className="px-4 py-3">Payment ID</th>
-                      <th className="px-4 py-3">Created</th>
+                      <th className="px-2 py-3 sm:px-4">User</th>
+                      <th className="px-2 py-3 sm:px-4">Plan</th>
+                      <th className="px-2 py-3 sm:px-4">Amount</th>
+                      <th className="px-2 py-3 sm:px-4">Status</th>
+                      <th className="px-2 py-3 sm:px-4">Start</th>
+                      <th className="px-2 py-3 sm:px-4">End</th>
+                      <th className="px-2 py-3 sm:px-4">Order ID</th>
+                      <th className="px-2 py-3 sm:px-4">Payment ID</th>
+                      <th className="px-2 py-3 sm:px-4">Created</th>
                     </tr>
                   </thead>
                   <tbody>
                     {subscriptions.map((sub) => (
                       <tr key={sub._id} className="border-t border-white/5 hover:bg-white/5">
-                        <td className="px-4 py-3">
+                        <td className="px-2 py-3 sm:px-4">
                           <div className="font-medium">{sub.user?.name || '—'}</div>
                           <div className="text-gray-400 text-xs">{sub.user?.email || ''}</div>
                         </td>
-                        <td className="px-4 py-3">{sub.planName || '—'}</td>
-                        <td className="px-4 py-3">{fmtRupees(sub.amount)}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 py-3 sm:px-4">{sub.planName || '—'}</td>
+                        <td className="px-2 py-3 sm:px-4">{fmtRupees(sub.amount)}</td>
+                        <td className="px-2 py-3 sm:px-4">
                           <StatusBadge status={sub.status} isActive={sub.isActive} />
                         </td>
-                        <td className="px-4 py-3">{fmtDate(sub.startDate)}</td>
-                        <td className="px-4 py-3">{fmtDate(sub.endDate)}</td>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{sub.orderId}</td>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{sub.paymentId || '—'}</td>
-                        <td className="px-4 py-3">{fmtDate(sub.createdAt)}</td>
+                        <td className="px-2 py-3 sm:px-4">{fmtDate(sub.startDate)}</td>
+                        <td className="px-2 py-3 sm:px-4">{fmtDate(sub.endDate)}</td>
+                        <td className="px-2 py-3 sm:px-4 text-gray-400 text-xs">{sub.orderId}</td>
+                        <td className="px-2 py-3 sm:px-4 text-gray-400 text-xs">{sub.paymentId || '—'}</td>
+                        <td className="px-2 py-3 sm:px-4">{fmtDate(sub.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -342,7 +343,7 @@ function Subscriptions() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <form
             onSubmit={savePlan}
-            className="w-full max-w-md bg-gray-900 border border-purple-500/30 rounded-2xl p-6 space-y-4"
+            className="w-full max-w-md bg-gray-900 border border-purple-500/30 rounded-2xl p-4 sm:p-6 space-y-4"
           >
             <h3 className="text-xl font-bold">{editingPlan ? 'Edit Plan' : 'Add Plan'}</h3>
 
@@ -364,7 +365,7 @@ function Subscriptions() {
                 placeholder="Short description"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm text-gray-300 mb-1">Amount (₹)</label>
                 <input
@@ -386,7 +387,7 @@ function Subscriptions() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
               <div>
                 <label className="block text-sm text-gray-300 mb-1">Sort order</label>
                 <input

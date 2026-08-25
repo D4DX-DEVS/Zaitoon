@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards, SkeletonText } from '../components/Skeleton'
 
 function Videos() {
   const navigate = useNavigate()
@@ -95,8 +96,9 @@ function Videos() {
       if (data.success) {
         setVideos(data.data.videos)
         if (data.data.pagination) {
-          setPagination(data.data.pagination)
-          setCurrentPage(data.data.pagination.page || page)
+          const p = data.data.pagination
+          setPagination({ total: p.totalVideos ?? p.total ?? 0, totalPages: p.totalPages ?? 1, limit: p.limit ?? 10 })
+          setCurrentPage(p.currentPage ?? p.page ?? page)
         }
       } else {
         showModal('error', 'Failed to fetch videos')
@@ -795,15 +797,15 @@ function Videos() {
   }, [showAddTrendingModal])
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Videos
@@ -843,7 +845,7 @@ function Videos() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="mb-8">
             <h2 
-              className="text-white text-2xl font-bold mb-6 relative"
+              className="text-white text-xl sm:text-2xl font-bold mb-4 sm:mb-6 relative"
               style={{ fontFamily: 'Archivo Black' }}
             >
               Video Categories
@@ -867,7 +869,7 @@ function Videos() {
                 </button>
               </div>
              ) : (
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
+               <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-4 mb-4">
                 {/* Category Cards - Limited Display */}
                      {categories.slice(0, 5).map((category) => (
                    <div 
@@ -909,15 +911,15 @@ function Videos() {
                        : 'border-dashed border-gray-600 hover:border-purple-500 hover:scale-105 hover:shadow-2xl'
                    }`}
                  >
-                   <div className="relative aspect-square overflow-hidden flex items-center justify-center">
+                   <div className="relative h-full min-h-[140px] sm:min-h-[176px] overflow-hidden flex items-center justify-center p-2">
                      <div className="text-center">
-                       <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                       <div className={`w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-3 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                          showCategoryTable 
                            ? 'bg-purple-600/30 border-purple-400' 
                            : 'bg-purple-600/20 border-purple-500/30'
                        }`}>
                          <svg 
-                           className={`w-8 h-8 text-purple-400 transition-transform duration-300 ${
+                           className={`w-5 h-5 sm:w-8 sm:h-8 text-purple-400 transition-transform duration-300 ${
                              showCategoryTable ? 'rotate-90' : 'rotate-0'
                            }`}
                            fill="none" 
@@ -959,15 +961,15 @@ function Videos() {
                 e.preventDefault()
               }}
             >
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Header with Close Button */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                   <div className="flex-1">
                     <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                       Category Management
                     </h1>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => {
                         setShowCategoryForm(true)
@@ -1019,11 +1021,11 @@ function Videos() {
                       <thead className="sticky top-0 bg-transparent backdrop-blur-sm z-10">
                         <tr className="border-b border-gray-700/50">
                           <th className="text-left py-3 px-2 text-gray-500 font-semibold w-8"></th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Image</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Title</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Videos Count</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Created</th>
-                          <th className="text-left py-3 px-4 text-gray-300 font-semibold">Actions</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Image</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Title</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Videos Count</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Created</th>
+                          <th className="text-left py-3 px-2 sm:px-4 text-gray-300 font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1158,10 +1160,10 @@ function Videos() {
                 e.preventDefault()
               }}
             >
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
+                  <div className="flex flex-wrap items-center gap-4">
                     {selectedCategory.image && (
                       <img
                         src={selectedCategory.image}
@@ -1191,9 +1193,7 @@ function Videos() {
 
                 {/* Videos list inside category */}
                 {categoryVideosLoading ? (
-                  <div className="flex justify-center items-center py-16">
-                    <div className="text-white text-base">Loading videos...</div>
-                  </div>
+                  <SkeletonCards count={4} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" />
                 ) : categoryVideos.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-gray-400 text-base mb-4">
@@ -1219,7 +1219,7 @@ function Videos() {
                             : 'border-gray-700 hover:border-purple-500/70 hover:bg-gray-800/80'
                         }`}
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex flex-wrap items-center gap-3">
                           {/* Drag handle */}
                           <div className="cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300">
                             <svg
@@ -1339,7 +1339,7 @@ function Videos() {
         {/* Trending Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="mb-8">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
               <h2 
                 className="text-white text-2xl font-bold relative"
                 style={{ fontFamily: 'Archivo Black' }}
@@ -1370,7 +1370,7 @@ function Videos() {
               </button>
             </div>
             {trendingLoading ? (
-              <div className="text-gray-400">Loading trending...</div>
+              <SkeletonCards count={4} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" />
             ) : trending.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 No trending videos. Add videos from your existing video list.
@@ -1391,7 +1391,7 @@ function Videos() {
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
                   {trending.map((entry) => {
                     const v = entry.video
                     if (!v) return null
@@ -1463,7 +1463,7 @@ function Videos() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="mb-8">
             <h2 
-              className="text-white text-2xl font-bold mb-6 relative"
+              className="text-white text-xl sm:text-2xl font-bold mb-4 sm:mb-6 relative"
               style={{ fontFamily: 'Archivo Black' }}
             >
               Videos
@@ -1477,9 +1477,7 @@ function Videos() {
           </div>
           
           {loading && videos.length === 0 ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-white text-lg">Loading videos...</div>
-            </div>
+            <SkeletonCards count={6} />
           ) : videos.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 text-lg mb-6">No videos found</div>
@@ -1504,7 +1502,7 @@ function Videos() {
                   </button>
                 </div>
               )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
               {videos.map((video) => {
                 const isThisCardExpanded = expandedCard === video._id
                 const currentVideo = expandedCard === video._id && selectedVideo ? selectedVideo : video
@@ -1569,7 +1567,7 @@ function Videos() {
 
                       {/* Video Info */}
                       <div className="p-4">
-                        <h3 className="text-white text-sm font-semibold truncate mb-1">
+                        <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">
                           {video.title}
                         </h3>
                         {video.category && (
@@ -1598,13 +1596,11 @@ function Videos() {
                           }}
                         >
                           {!currentVideo.title ? (
-                            <div className="flex items-center justify-center py-20">
-                              <div className="text-white text-lg">Loading details...</div>
-                            </div>
+                            <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
                           ) : (
-                            <div className="p-6">
+                            <div className="p-4 sm:p-6">
                               {/* Header with Close Button */}
-                              <div className="flex justify-between items-start mb-6">
+                              <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                                 <div className="flex-1">
                                   <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                                     {currentVideo.title}
@@ -1646,7 +1642,7 @@ function Videos() {
                                   {currentVideo.category && (
                                     <div className="bg-gray-800/50 rounded-lg p-3">
                                       <span className="text-gray-400 text-xs mb-2 block">Category</span>
-                                      <div className="flex items-center space-x-3">
+                                      <div className="flex flex-wrap items-center gap-3">
                                         {currentVideo.category.image && (
                                           <img
                                             src={currentVideo.category.image}
@@ -1682,7 +1678,7 @@ function Videos() {
                                 </div>
                                 
                                 {/* Action Icons */}
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-wrap items-center gap-3">
                                   {isVideoInTrending(currentVideo._id) ? (
                                     <span className="flex items-center space-x-1 px-2 py-1 text-green-400 text-sm" title="In Trending">
                                       <FiTrendingUp className="w-4 h-4" />
@@ -1739,15 +1735,15 @@ function Videos() {
 
           {/* Pagination */}
           {!loading && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-8 pb-4">
-              <p className="text-gray-400 text-sm">
+            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 mt-8 pb-4">
+              <p className="text-gray-400 text-sm text-center sm:text-left">
                 Showing {(currentPage - 1) * pagination.limit + 1}–{Math.min(currentPage * pagination.limit, pagination.total)} of {pagination.total} videos
               </p>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
                   onClick={() => fetchVideos(currentPage - 1)}
                   disabled={currentPage <= 1}
-                  className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200"
+                  className="px-2.5 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200"
                 >
                   Previous
                 </button>
@@ -1755,7 +1751,7 @@ function Videos() {
                   <button
                     key={p}
                     onClick={() => fetchVideos(p)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition duration-200 ${
+                    className={`px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm rounded-lg font-medium transition duration-200 ${
                       p === currentPage
                         ? 'text-white'
                         : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -1770,7 +1766,7 @@ function Videos() {
                 <button
                   onClick={() => fetchVideos(currentPage + 1)}
                   disabled={currentPage >= pagination.totalPages}
-                  className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200"
+                  className="px-2.5 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200"
                 >
                   Next
                 </button>
@@ -1782,8 +1778,8 @@ function Videos() {
         {/* Video Form Modal */}
         {showVideoForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white">
                   {editingVideo ? 'Edit Video' : 'Add New Video'}
                 </h2>
@@ -1893,7 +1889,7 @@ function Videos() {
                     onDateChange={setScheduledAt}
                   />
                 )}
-                <div className="flex justify-end space-x-4 pt-8">
+                <div className="flex flex-wrap justify-end gap-4 pt-8">
                   <button
                     type="button"
                     onClick={resetVideoForm}
@@ -1942,8 +1938,8 @@ function Videos() {
         {/* Category Form Modal */}
         {showCategoryForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-md shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   {editingCategory ? 'Edit Category' : 'Add New Category'}
                 </h2>
@@ -1983,7 +1979,7 @@ function Videos() {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-4 pt-8">
+                <div className="flex flex-wrap justify-end gap-4 pt-8">
                   <button
                     type="button"
                     onClick={resetCategoryForm}
@@ -2032,8 +2028,8 @@ function Videos() {
         {/* Add to Trending Modal */}
         {showAddTrendingModal && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-gray-600/50">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-md shadow-2xl border border-gray-600/50">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   Add to Trending
                 </h2>
@@ -2100,7 +2096,7 @@ function Videos() {
           <img 
             src={gradient} 
             alt="Gradient" 
-            className="w-[800px] h-[800px] opacity-60"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           />
         </div>
 

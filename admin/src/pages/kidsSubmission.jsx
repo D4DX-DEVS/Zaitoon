@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { FiPlus, FiEdit, FiTrash2, FiEye, FiX, FiUpload, FiImage, FiUser, FiBook, FiStar, FiCheckCircle, FiClock, FiFileText } from 'react-icons/fi'
+import { FaWhatsapp } from 'react-icons/fa'
 import SuccessModal from '../components/SuccessModal'
 import Sidebar from '../components/Sidebar'
 import CustomDropdown from '../components/CustomDropdown'
 import SchedulePicker from '../components/SchedulePicker'
 import HighlightDurationPicker from '../components/HighlightDurationPicker'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards } from '../components/Skeleton'
 
 const KidsSubmission = () => {
   // States
@@ -13,7 +15,7 @@ const KidsSubmission = () => {
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingSubmission, setEditingSubmission] = useState(null)
-  const [expandedCard, setExpandedCard] = useState(null)
+  const [, setExpandedCard] = useState(null)
   const [selectedSubmission, setSelectedSubmission] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
   const [detailsRemarks, setDetailsRemarks] = useState('')
@@ -202,7 +204,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to create submission')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error creating submission')
     } finally {
       setLoading(false)
@@ -253,7 +255,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to update submission')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error updating submission')
     } finally {
       setLoading(false)
@@ -285,7 +287,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to update submission status')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error updating submission status')
     } finally {
       setLoading(false)
@@ -313,7 +315,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to send suggestions')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error sending suggestions')
     } finally {
       setLoading(false)
@@ -345,7 +347,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to update submission type')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error updating submission type')
     } finally {
       setLoading(false)
@@ -377,7 +379,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to update submission highlight')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error updating submission highlight')
     } finally {
       setLoading(false)
@@ -404,7 +406,7 @@ const KidsSubmission = () => {
       } else {
         showModal('error', data.message || 'Failed to delete submission')
       }
-    } catch (error) {
+    } catch {
       showModal('error', 'Error deleting submission')
     } finally {
       setLoading(false)
@@ -507,17 +509,17 @@ const KidsSubmission = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       {/* Sidebar */}
       <Sidebar />
       
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Kids Submissions
@@ -571,10 +573,10 @@ const KidsSubmission = () => {
                 <table className="w-full">
                   <thead className="bg-gray-800/50 border-b border-gray-700/50">
                     <tr>
-                      <th className="text-left py-4 px-6 text-gray-300 font-semibold">Title</th>
-                      <th className="text-left py-4 px-6 text-gray-300 font-semibold">Type</th>
-                      <th className="text-left py-4 px-6 text-gray-300 font-semibold">Status</th>
-                      <th className="text-left py-4 px-6 text-gray-300 font-semibold">Highlight</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-6 text-gray-300 font-semibold">Title</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-6 text-gray-300 font-semibold">Type</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-6 text-gray-300 font-semibold">Status</th>
+                      <th className="text-left py-3 px-3 sm:py-4 sm:px-6 text-gray-300 font-semibold hidden sm:table-cell">Highlight</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -584,26 +586,26 @@ const KidsSubmission = () => {
                         className="border-b border-gray-800/50 hover:bg-gray-800/30 transition duration-200 cursor-pointer"
                         onClick={() => viewSubmission(submission)}
                       >
-                        <td className="py-4 px-6">
-                          <div className="max-w-xs">
+                        <td className="py-3 px-3 sm:py-4 sm:px-6">
+                          <div className="max-w-[130px] sm:max-w-xs">
                             <h3 className="text-white font-medium truncate">{submission.title}</h3>
                             {submission.moreTitle && (
                               <p className="text-gray-400 text-sm truncate">{submission.moreTitle}</p>
                             )}
                           </div>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-3 sm:py-4 sm:px-6">
                           <div className="flex items-center space-x-2 text-purple-400">
                             {getContentTypeIcon(submission.contentType)}
-                            <span className="text-sm font-medium capitalize">{submission.contentType}</span>
+                            <span className="text-sm font-medium capitalize hidden sm:inline">{submission.contentType}</span>
                           </div>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-3 sm:py-4 sm:px-6">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}>
                             {submission.status}
                           </span>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">
                           {submission.highlight === 'Enable' ? (
                             <div className="flex items-center space-x-1 text-yellow-400">
                               <FiStar className="w-4 h-4" />
@@ -630,7 +632,7 @@ const KidsSubmission = () => {
               </p>
 
               {/* Page buttons */}
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 {/* Previous */}
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -689,9 +691,7 @@ const KidsSubmission = () => {
 
           {/* Loading State */}
           {loading && (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            </div>
+            <SkeletonCards count={6} />
           )}
 
           {/* Empty State */}
@@ -714,7 +714,7 @@ const KidsSubmission = () => {
           <img 
             src={gradient} 
             alt="Gradient" 
-            className="w-[800px] h-[800px] opacity-60"
+            className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
           />
         </div>
       </div>
@@ -722,8 +722,8 @@ const KidsSubmission = () => {
       {/* Submission Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 {editingSubmission ? 'Edit Submission' : 'Add New Submission'}
               </h2>
@@ -1034,7 +1034,7 @@ const KidsSubmission = () => {
               )}
 
               {/* Submit Buttons */}
-              <div className="flex space-x-4 pt-6">
+              <div className="flex flex-wrap gap-4 pt-6">
                 <button
                   type="button"
                   onClick={resetSubmissionForm}
@@ -1065,8 +1065,8 @@ const KidsSubmission = () => {
       {/* Submission Details Modal */}
       {showDetails && selectedSubmission && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                 Submission Details
               </h2>
@@ -1080,8 +1080,8 @@ const KidsSubmission = () => {
 
             <div className="space-y-6">
               {/* Header Info */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   {getContentTypeIcon(selectedSubmission.contentType)}
                   <div>
                     <h3 className="text-xl font-semibold text-white">{selectedSubmission.title}</h3>
@@ -1232,7 +1232,7 @@ const KidsSubmission = () => {
                 <h4 className="text-white font-semibold mb-3">Submission Details</h4>
                 <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
                   {/* Content Type Update Field */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <span className="text-gray-400">Content Type:</span>
                     <div className="flex items-center space-x-2">
                       <CustomDropdown
@@ -1256,7 +1256,7 @@ const KidsSubmission = () => {
                   </div>
 
                   {/* Status Update Field */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <span className="text-gray-400">Status:</span>
                     <div className="flex items-center space-x-2">
                       <CustomDropdown
@@ -1294,7 +1294,7 @@ const KidsSubmission = () => {
                       className="flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed text-white"
                       style={{ background: 'linear-gradient(90.05deg, #AC28DC 6.68%, #7E1EB7 49.26%, #501392 91.85%)' }}
                     >
-                      <span>📲</span>
+                      <FaWhatsapp className="w-4 h-4" />
                       <span>Send via WhatsApp</span>
                     </button>
                   </div>
@@ -1302,7 +1302,7 @@ const KidsSubmission = () => {
                   {/* Highlight Radio Buttons */}
                   <div className="space-y-3">
                     <span className="text-gray-400">Highlight:</span>
-                    <div className="flex space-x-6">
+                    <div className="flex flex-wrap gap-6">
                       <label className="flex items-center space-x-3 cursor-pointer">
                         <div className="relative">
                           <input
@@ -1382,7 +1382,7 @@ const KidsSubmission = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex flex-wrap justify-end gap-4 pt-4">
                 <button
                   onClick={() => {
                     setShowDetails(false)

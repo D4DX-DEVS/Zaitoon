@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fi'
 import { HiCalendar } from 'react-icons/hi'
 import gradient from '../assets/gradiantRight.png'
+import { SkeletonCards, SkeletonText } from '../components/Skeleton'
 
 function Stories() {
   const navigate = useNavigate()
@@ -967,15 +968,15 @@ function Stories() {
   }, [currentPage, fetchStories])
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 min-w-0 ml-0 md:ml-56 pb-20 md:pb-0">
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h1 
-                className="text-white text-5xl font-bold mb-1 relative"
+                className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 relative"
                 style={{ fontFamily: 'Archivo Black' }}
               >
                 Stories
@@ -1014,9 +1015,7 @@ function Stories() {
         {/* Stories List */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {loading && stories.length === 0 ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-white text-lg">Loading stories...</div>
-            </div>
+            <SkeletonCards count={6} />
           ) : stories.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 text-lg mb-6">No stories found</div>
@@ -1041,7 +1040,7 @@ function Stories() {
                   </button>
                 </div>
               )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 lg:gap-6">
               {stories.map((story) => {
                 const isThisCardExpanded = expandedCard === story._id
                 const currentStory = expandedCard === story._id && selectedStory ? selectedStory : story
@@ -1058,7 +1057,7 @@ function Stories() {
                   >
                     {/* Story Card */}
                     <div 
-                      className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-[180px] h-[220px] ${
+                      className={`relative bg-gray-900 rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border-2 w-full aspect-[9/11] md:aspect-auto md:w-[180px] md:h-[220px] ${
                         isThisCardExpanded 
                           ? 'scale-110 z-10 shadow-2xl border-blue-500' 
                           : 'hover:scale-105 hover:shadow-2xl border-transparent hover:border-gray-600'
@@ -1092,12 +1091,12 @@ function Stories() {
                         )}
                         
                         {/* Title Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 z-10">
-                          <h3 className="text-white text-sm font-semibold truncate mb-1">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 sm:p-3 z-10">
+                          <h3 className="text-white text-[10px] sm:text-sm font-semibold truncate mb-0.5 sm:mb-1">
                             {story.title}
                           </h3>
                           {story.mlTitle && (
-                            <p className="text-gray-300 text-xs truncate">
+                            <p className="text-gray-300 text-[9px] sm:text-xs truncate">
                               {story.mlTitle}
                             </p>
                           )}
@@ -1123,13 +1122,11 @@ function Stories() {
                           }}
                         >
                           {!currentStory.description ? (
-                            <div className="flex items-center justify-center py-20">
-                              <div className="text-white text-lg">Loading details...</div>
-                    </div>
+                            <div className="p-4 sm:p-6"><SkeletonText lines={6} /></div>
                           ) : (
-                            <div className="p-6">
+                            <div className="p-4 sm:p-6">
                               {/* Header with Close Button */}
-                              <div className="flex justify-between items-start mb-6">
+                              <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                                 <div className="flex-1">
                                   <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                                     {currentStory.title}
@@ -1228,7 +1225,7 @@ function Stories() {
 
                               {/* Episodes Management */}
                               <div className="mb-6">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                                   <h3 className="text-white text-lg font-semibold" style={{ fontFamily: 'Archivo Black' }}>
                                     {selectedSeasonId ? 'Episodes' : 'Seasons & Episodes'}
                                   </h3>
@@ -1272,8 +1269,8 @@ function Stories() {
                                         <div className="space-y-4">
                                           {/* Selected Season Info */}
                                           <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4">
-                                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-3">
+                                            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                <div className="flex flex-wrap items-center gap-3">
                                                 {selectedSeason.seasonBanner && (
                                                   <img
                                                     src={selectedSeason.seasonBanner}
@@ -1430,7 +1427,7 @@ function Stories() {
                                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {currentStory.seasons.map((season) => (
                                           <div key={season._id} className="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4 hover:bg-gray-800/70 transition duration-200">
-                                            <div className="flex items-center justify-between mb-3">
+                                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                                               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setSelectedSeasonId(season._id)}>
                                                 {season.seasonBanner && (
                                                   <img
@@ -1514,7 +1511,7 @@ function Stories() {
                                 </div>
                                 
                                 {/* Action Icons */}
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-wrap items-center gap-3">
                                   <button
                                     onClick={(e) => {
                                       e.preventDefault()
@@ -1584,8 +1581,8 @@ function Stories() {
         {/* Story Form Modal */}
         {showStoryForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white">
                   {editingStory ? 'Edit Story' : 'Add New Story'}
                 </h2>
@@ -1727,7 +1724,7 @@ function Stories() {
                 )}
 
                 {/* Submit Buttons */}
-                <div className="flex justify-end space-x-4 pt-8">
+                <div className="flex flex-wrap justify-end gap-4 pt-8">
                   <button
                     type="button"
                     onClick={resetStoryForm}
@@ -1776,8 +1773,8 @@ function Stories() {
         {/* Season Form Modal */}
         {showSeasonForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-md shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   {editingSeason ? 'Edit Season' : 'Add New Season'}
                 </h2>
@@ -1812,7 +1809,7 @@ function Stories() {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-4 pt-8">
+                <div className="flex flex-wrap justify-end gap-4 pt-8">
                   <button
                     type="button"
                     onClick={resetSeasonForm}
@@ -1861,8 +1858,8 @@ function Stories() {
         {/* Episode Form Modal */}
         {showEpisodeForm && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth scroll-indicator">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Archivo Black' }}>
                   {editingEpisode ? 'Edit Episode' : 'Add New Episode'}
                 </h2>
@@ -2236,7 +2233,7 @@ function Stories() {
                   <p className="text-gray-400 text-xs mt-2">Only MP3 format is supported</p>
                 </div>
 
-                <div className="flex justify-end space-x-4 pt-8">
+                <div className="flex flex-wrap justify-end gap-4 pt-8">
                   <button
                     type="button"
                     onClick={resetEpisodeForm}
@@ -2286,9 +2283,9 @@ function Stories() {
         {showEpisodeDetails && selectedEpisode && (
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
             <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600/50 scrollbar-hide scroll-smooth">
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Header with Close Button */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
                   <div className="flex-1">
                     <h1 className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Archivo Black' }}>
                       {selectedEpisode.title}
@@ -2594,7 +2591,7 @@ function Stories() {
         <img 
           src={gradient} 
           alt="Gradient" 
-          className="w-[800px] h-[800px] opacity-60"
+          className="w-[350px] h-[350px] md:w-[800px] md:h-[800px] opacity-60"
         />
       </div>
 
