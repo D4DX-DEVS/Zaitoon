@@ -10,6 +10,12 @@ const appConfigSchema = new mongoose.Schema(
       type: String,
       enum: ["instagram", "vertical"],
       default: "instagram"
+    },
+    // Global membership switch: when false the app hides membership
+    // and the API refuses new signups
+    membershipEnabled: {
+      type: Boolean,
+      default: true
     }
   },
   {

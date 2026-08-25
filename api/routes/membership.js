@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Membership = require("../models/membership");
+const AppConfig = require("../models/appConfig");
 const { upload, deleteFile, getFileKeyFromUrl } = require("../utils/cdn");
 const { authenticateAdmin, authenticateFirebaseToken } = require("../middleware/auth");
 
@@ -17,6 +18,11 @@ router.post("/", authenticateFirebaseToken, upload.single("photo"), async (req, 
     const userId = req.user?.id && String(req.user.id);
     if (!userId) {
       return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+
+    const config = await AppConfig.getConfig();
+    if (!config.membershipEnabled) {
+      return res.status(403).json({ success: false, message: "Membership is currently closed." });
     }
 
     const { name, phone } = req.body;
@@ -132,6 +138,11 @@ router.put("/:id", authenticateAdmin, upload.single("photo"), async (req, res) =
     }
     const doc = await Membership.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: "Membership not found" });
+
+    const config = await AppConfig.getConfig();
+    if (!config.membershipEnabled) {
+      return res.status(403).json({ success: false, message: "Membership is currently closed." });
+    }
 
     const { name, phone } = req.body;
     const className = req.body.className || req.body.class;

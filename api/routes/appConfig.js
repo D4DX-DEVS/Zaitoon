@@ -28,6 +28,16 @@ router.put("/", authenticateToken, async (req, res) => {
       update.pdfReadingMode = req.body.pdfReadingMode;
     }
 
+    if (req.body.membershipEnabled !== undefined) {
+      if (typeof req.body.membershipEnabled !== "boolean") {
+        return res.status(400).json({
+          success: false,
+          message: "membershipEnabled must be a boolean"
+        });
+      }
+      update.membershipEnabled = req.body.membershipEnabled;
+    }
+
     const config = await AppConfig.updateOrCreate(update);
     res.status(200).json({ success: true, data: config.toObject() });
   } catch (error) {
