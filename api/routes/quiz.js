@@ -16,6 +16,7 @@ const {
   getCurrentOrLatestQuizConfig,
   getQuizConfigForQuiz
 } = require("../utils/quizConfigResolver");
+const { parseClassFilter } = require("../utils/classFilter");
 const router = express.Router();
 
 // Start of "today" and "tomorrow" in given timezone (daily rollover at 12:00 AM in that zone).
@@ -568,7 +569,7 @@ router.get("/today", async (req, res) => {
 // Accepts either ?date=YYYY-MM-DD (single day) or ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD (range)
 router.get("/leaderboard/daily", async (req, res) => {
   try {
-    const { date, startDate, endDate, page: pageQuery, limit: limitQuery, search, configId } = req.query;
+    const { date, startDate, endDate, page: pageQuery, limit: limitQuery, search, configId, classes } = req.query;
 
     let startOfDay, endOfDay;
 
@@ -644,6 +645,12 @@ router.get("/leaderboard/daily", async (req, res) => {
       });
     }
 
+    // Class filter (e.g. classes=8,9,10,11,12)
+    const classPatterns = parseClassFilter(classes);
+    if (classPatterns) {
+      pipeline.push({ $match: { _class: { $in: classPatterns } } });
+    }
+
     pipeline.push({ $sort: { score: -1, totalDuration: 1, createdAt: -1 } });
 
     // Use $facet for count + paginated data in one query
@@ -711,7 +718,7 @@ router.get("/leaderboard/daily", async (req, res) => {
 // GET /api/quizzes/leaderboard/total - Get total leaderboard for a date range (public, paginated)
 router.get("/leaderboard/total", async (req, res) => {
   try {
-    const { startDate, endDate, page: pageQuery, limit: limitQuery, search } = req.query;
+    const { startDate, endDate, page: pageQuery, limit: limitQuery, search, classes } = req.query;
 
     const page = Math.max(1, parseInt(pageQuery, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(limitQuery, 10) || 10));
@@ -805,6 +812,12 @@ router.get("/leaderboard/total", async (req, res) => {
       });
     }
 
+    // Class filter (e.g. classes=8,9,10,11,12)
+    const classPatterns = parseClassFilter(classes);
+    if (classPatterns) {
+      pipeline.push({ $match: { _class: { $in: classPatterns } } });
+    }
+
     pipeline.push({ $sort: { totalScore: -1, totalDuration: 1 } });
 
     pipeline.push({
@@ -863,7 +876,7 @@ router.get("/leaderboard/total", async (req, res) => {
 // GET /api/quizzes/leaderboard/by-email - Leaderboard grouped by email (paginated, searchable)
 router.get("/leaderboard/by-email", async (req, res) => {
   try {
-    const { startDate, endDate, page: pageQuery, limit: limitQuery, search, configId } = req.query;
+    const { startDate, endDate, page: pageQuery, limit: limitQuery, search, configId, classes } = req.query;
 
     const page = Math.max(1, parseInt(pageQuery, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(limitQuery, 10) || 10));
@@ -934,6 +947,12 @@ router.get("/leaderboard/by-email", async (req, res) => {
           ]
         }
       });
+    }
+
+    // Class filter (e.g. classes=8,9,10,11,12)
+    const classPatterns = parseClassFilter(classes);
+    if (classPatterns) {
+      pipeline.push({ $match: { userClass: { $in: classPatterns } } });
     }
 
     pipeline.push({ $sort: { totalScore: -1, totalDuration: 1 } });
