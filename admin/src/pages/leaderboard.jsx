@@ -13,12 +13,23 @@ import {
   FiX,
   FiEye,
   FiClock,
-  FiGlobe
+  FiGlobe,
+  FiFilter,
+  FiChevronDown
 } from 'react-icons/fi'
 import { FaMedal } from 'react-icons/fa'
 
 const today = () => new Date().toISOString().split('T')[0]
 const LIMIT = 10
+
+// Keys must match api/utils/classFilter.js
+const CLASS_FILTER_OPTIONS = [
+  { key: 'PRE_KG', label: 'Pre KG' },
+  { key: 'LKG', label: 'LKG' },
+  { key: 'UKG', label: 'UKG' },
+  ...Array.from({ length: 12 }, (_, i) => ({ key: String(i + 1), label: `Class ${i + 1}` })),
+  { key: 'NOT_STUDYING', label: 'Not Studying' }
+]
 
 function Leaderboard() {
   const navigate = useNavigate()
@@ -38,6 +49,11 @@ function Leaderboard() {
   const [configs, setConfigs] = useState([])
   const [selectedConfigId, setSelectedConfigId] = useState('')
 
+  // Class filter
+  const [selectedClasses, setSelectedClasses] = useState([])
+  const [classMenuOpen, setClassMenuOpen] = useState(false)
+  const classMenuRef = useRef(null)
+
   // User detail modal
   const [selectedUser, setSelectedUser] = useState(null)
   const [userAttempts, setUserAttempts] = useState([])
@@ -55,6 +71,15 @@ function Leaderboard() {
     fetchConfigs()
   }, [])
 
+  useEffect(() => {
+    if (!classMenuOpen) return
+    const onClickOutside = (e) => {
+      if (classMenuRef.current && !classMenuRef.current.contains(e.target)) setClassMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [classMenuOpen])
+
   const fetchConfigs = async () => {
     try {
       const token = localStorage.getItem('adminToken')
@@ -69,7 +94,8 @@ function Leaderboard() {
 
   const fetchData = useCallback(async (
     from = fromDate, to = toDate, mode = viewMode,
-    allTime = totalAllTime, p = page, s = search, configId = selectedConfigId
+    allTime = totalAllTime, p = page, s = search, configId = selectedConfigId,
+    classes = selectedClasses
   ) => {
     const isByEmail = mode === 'byEmail'
     if (!isByEmail && (!from || !to)) return
@@ -82,6 +108,7 @@ function Leaderboard() {
       params.set('limit', LIMIT)
       if (s && s.trim()) params.set('search', s.trim())
       if (configId) params.set('configId', configId)
+      if (classes && classes.length) params.set('classes', classes.join(','))
 
       let url
       if (isByEmail) {
@@ -127,7 +154,7 @@ function Leaderboard() {
     } finally {
       setLoading(false)
     }
-  }, [fromDate, toDate, viewMode, totalAllTime, page, search, API_BASE, selectedConfigId])
+  }, [fromDate, toDate, viewMode, totalAllTime, page, search, API_BASE, selectedConfigId, selectedClasses])
 
   // Debounced search
   const handleSearchChange = (val) => {
@@ -155,6 +182,21 @@ function Leaderboard() {
     } else if (fromDate && toDate && fromDate <= toDate) {
       fetchData(fromDate, toDate, viewMode, totalAllTime, 1, search, selectedConfigId)
     }
+  }
+
+  const toggleClass = (key) => {
+    setSelectedClasses(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
+  }
+
+  const applyClassFilter = (classes = selectedClasses) => {
+    setClassMenuOpen(false)
+    setPage(1)
+    fetchData(fromDate, toDate, viewMode, totalAllTime, 1, search, selectedConfigId, classes)
+  }
+
+  const clearClassFilter = () => {
+    setSelectedClasses([])
+    applyClassFilter([])
   }
 
   const setMode = (mode) => {
@@ -211,7 +253,7 @@ function Leaderboard() {
     setTotalAllTime(false)
     setPage(1)
     setSearch('')
-    fetchData(today(), today(), viewMode, false, 1, '', selectedConfigId)
+    fetchData(today(), today(), viewMode, false, 1, '', selectedConfigId, selectedClasses)
   }
 
   // Fetch user's individual attempts for the modal
@@ -325,6 +367,64 @@ function Leaderboard() {
                   <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
               </select>
+            )}
+
+            {/* Class filter — quiz modes only; global leaderboard has no class data */}
+            {viewMode !== 'global' && (
+            <div className="relative" ref={classMenuRef}>
+              <button
+                type="button"
+                onClick={() => setClassMenuOpen(o => !o)}
+                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${
+                  selectedClasses.length
+                    ? 'bg-purple-600/20 text-purple-200 border-purple-500'
+                    : 'bg-gray-800 text-white border-gray-700 hover:border-gray-500'
+                }`}
+              >
+                <FiFilter className="w-4 h-4 opacity-70" />
+                <span>
+                  {selectedClasses.length === 0
+                    ? 'All Classes'
+                    : `${selectedClasses.length} class${selectedClasses.length > 1 ? 'es' : ''} selected`}
+                </span>
+                <FiChevronDown className={`w-4 h-4 transition-transform ${classMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {classMenuOpen && (
+                <div className="absolute left-0 z-30 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-2">
+                  <div className="max-h-64 overflow-y-auto pr-1">
+                    {CLASS_FILTER_OPTIONS.map(opt => (
+                      <label
+                        key={opt.key}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-700/60 cursor-pointer text-sm text-gray-200"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedClasses.includes(opt.key)}
+                          onChange={() => toggleClass(opt.key)}
+                          className="rounded border-gray-600 bg-gray-900 text-purple-500 focus:ring-purple-500"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 pt-2 mt-2 border-t border-gray-700">
+                    <button
+                      onClick={clearClassFilter}
+                      className="px-2 py-1 text-xs text-gray-400 hover:text-white"
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => applyClassFilter()}
+                      className="px-3 py-1 bg-purple-600 text-white text-xs rounded-md hover:bg-purple-700"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             )}
 
             {/* Search */}
