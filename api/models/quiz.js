@@ -34,6 +34,12 @@ const quizSchema = new mongoose.Schema({
     ref: "Question",
     required: true
   }],
+  // Previous quizzes whose attempts are merged into this quiz's leaderboard.
+  // Empty/absent means the board shows this quiz's own attempts only.
+  includedQuizIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Quiz"
+  }],
   status: {
     type: String,
     enum: ["Active", "Inactive"],

@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import axios from 'axios'
 import { SkeletonTable } from '../components/Skeleton'
+import SuccessModal from '../components/SuccessModal'
+import ClearQuizPointsModal from '../components/ClearQuizPointsModal'
+import { fetchClearContext, clearQuizPoints } from '../utils/quizClear'
 import {
   FiAward,
   FiCalendar,
@@ -15,7 +18,8 @@ import {
   FiClock,
   FiGlobe,
   FiFilter,
-  FiChevronDown
+  FiChevronDown,
+  FiRotateCcw
 } from 'react-icons/fi'
 import { FaMedal } from 'react-icons/fa'
 
@@ -49,6 +53,16 @@ function Leaderboard() {
   const [configs, setConfigs] = useState([])
   const [selectedConfigId, setSelectedConfigId] = useState('')
 
+  // Individual quiz filter (scopes the By Email board to one quiz)
+  const [quizOptions, setQuizOptions] = useState([])
+  const [selectedQuizId, setSelectedQuizId] = useState('')
+
+  // Per-quiz leaderboard clearing
+  const [clearTarget, setClearTarget] = useState(null)
+  const [clearContext, setClearContext] = useState({ attemptCount: 0, referencedBy: 0 })
+  const [clearCountLoading, setClearCountLoading] = useState(false)
+  const [modal, setModal] = useState({ isOpen: false, type: 'success', message: '' })
+
   // Class filter
   const [selectedClasses, setSelectedClasses] = useState([])
   const [classMenuOpen, setClassMenuOpen] = useState(false)
@@ -69,6 +83,7 @@ function Leaderboard() {
   useEffect(() => {
     fetchData()
     fetchConfigs()
+    fetchQuizOptions('')
   }, [])
 
   useEffect(() => {
@@ -92,10 +107,59 @@ function Leaderboard() {
     }
   }
 
+  const fetchQuizOptions = async (configId) => {
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await axios.get(`${API_BASE}/quizzes`, {
+        params: { ...(configId ? { configId } : {}), limit: 100 },
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.data.success) setQuizOptions(res.data.data.quizzes || [])
+    } catch (e) {
+      console.error('Failed to fetch quizzes:', e)
+      setQuizOptions([])
+    }
+  }
+
+  const openClearModal = async () => {
+    const quiz = quizOptions.find(q => q._id === selectedQuizId)
+    if (!quiz) return
+    setClearTarget(quiz)
+    setClearContext({ attemptCount: 0, referencedBy: 0 })
+    setClearCountLoading(true)
+    try {
+      setClearContext(await fetchClearContext(API_BASE, quiz))
+    } catch (e) {
+      console.error('Failed to load clear context:', e)
+    } finally {
+      setClearCountLoading(false)
+    }
+  }
+
+  const handleClearConfirm = async (options) => {
+    const quiz = clearTarget
+    setClearTarget(null)
+    try {
+      const { deletedCount, carryOverRemoved } = await clearQuizPoints(API_BASE, quiz._id, options)
+      const parts = []
+      if (options.deleteAttempts) parts.push(`${deletedCount} attempt(s) deleted`)
+      if (options.clearCarryOver) parts.push(`${carryOverRemoved} carried-over quiz(zes) removed`)
+      setModal({ isOpen: true, type: 'success', message: parts.join(', ') })
+      await fetchQuizOptions(selectedConfigId)
+      fetchData()
+    } catch (error) {
+      setModal({
+        isOpen: true,
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to clear leaderboard'
+      })
+    }
+  }
+
   const fetchData = useCallback(async (
     from = fromDate, to = toDate, mode = viewMode,
     allTime = totalAllTime, p = page, s = search, configId = selectedConfigId,
-    classes = selectedClasses
+    classes = selectedClasses, quizId = selectedQuizId
   ) => {
     const isByEmail = mode === 'byEmail'
     if (!isByEmail && (!from || !to)) return
@@ -112,7 +176,16 @@ function Leaderboard() {
 
       let url
       if (isByEmail) {
-        if (!allTime) { params.set('startDate', from); params.set('endDate', to) }
+        if (quizId) {
+          // Scope to one quiz: its own attempts plus anything it carries over.
+          // Dates are left off deliberately - carried-over attempts are older.
+          params.set('quizId', quizId)
+        } else {
+          // The API defaults an unscoped by-email request to the current quiz's
+          // board (that is what the app asks for). Admin wants the full history.
+          params.set('scope', 'all')
+          if (!allTime) { params.set('startDate', from); params.set('endDate', to) }
+        }
         url = `${API_BASE}/quizzes/leaderboard/by-email?${params}`
       } else {
         // Use date range when from !== to, otherwise single date
@@ -154,7 +227,7 @@ function Leaderboard() {
     } finally {
       setLoading(false)
     }
-  }, [fromDate, toDate, viewMode, totalAllTime, page, search, API_BASE, selectedConfigId, selectedClasses])
+  }, [fromDate, toDate, viewMode, totalAllTime, page, search, API_BASE, selectedConfigId, selectedClasses, selectedQuizId])
 
   // Debounced search
   const handleSearchChange = (val) => {
@@ -357,8 +430,10 @@ function Leaderboard() {
                 onChange={(e) => {
                   const val = e.target.value
                   setSelectedConfigId(val)
+                  setSelectedQuizId('')
                   setPage(1)
-                  fetchData(fromDate, toDate, viewMode, totalAllTime, 1, search, val)
+                  fetchQuizOptions(val)
+                  fetchData(fromDate, toDate, viewMode, totalAllTime, 1, search, val, selectedClasses, '')
                 }}
                 className="px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500"
               >
@@ -367,6 +442,38 @@ function Leaderboard() {
                   <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
               </select>
+            )}
+
+            {/* Single-quiz scope — By Email only, since that is the board the
+                per-quiz carry-over rules apply to */}
+            {viewMode === 'byEmail' && quizOptions.length > 0 && (
+              <>
+                <select
+                  value={selectedQuizId}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setSelectedQuizId(val)
+                    setPage(1)
+                    fetchData(fromDate, toDate, viewMode, totalAllTime, 1, search, selectedConfigId, selectedClasses, val)
+                  }}
+                  className="px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">All time (every quiz)</option>
+                  {quizOptions.map(q => (
+                    <option key={q._id} value={q._id}>{q.title}</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={openClearModal}
+                  disabled={!selectedQuizId}
+                  title="Clear this quiz's leaderboard"
+                  className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiRotateCcw className="w-4 h-4" /> Clear
+                </button>
+              </>
             )}
 
             {/* Class filter — quiz modes only; global leaderboard has no class data */}
@@ -799,6 +906,23 @@ function Leaderboard() {
           </div>
         </div>
       )}
+
+      <SuccessModal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        message={modal.message}
+        onClose={() => setModal({ isOpen: false, type: 'success', message: '' })}
+      />
+
+      <ClearQuizPointsModal
+        isOpen={!!clearTarget}
+        quiz={clearTarget}
+        attemptCount={clearContext.attemptCount}
+        referencedBy={clearContext.referencedBy}
+        countLoading={clearCountLoading}
+        onClose={() => setClearTarget(null)}
+        onConfirm={handleClearConfirm}
+      />
     </div>
   )
 }

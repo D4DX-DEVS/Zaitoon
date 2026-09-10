@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const QuizAttempt = require("../models/quizAttempt");
 const Quiz = require("../models/quiz");
 const QuizConfig = require("../models/quizConfig");
@@ -358,7 +360,8 @@ router.get("/admin/all", authenticateToken, async (req, res) => {
       endDate,
       email: filterEmail,
       userId: filterUserId,
-      configId
+      configId,
+      quizId
     } = req.query;
 
     const page = Math.max(1, parseInt(pageQuery, 10) || 1);
@@ -367,8 +370,12 @@ router.get("/admin/all", authenticateToken, async (req, res) => {
 
     const filter = {};
 
-    // Filter by quiz config — include null-quizId (legacy) attempts so they are not dropped
-    if (configId) {
+    // A single quiz beats a whole config. Legacy null-quizId attempts belong to
+    // no single quiz, so they are deliberately excluded from the quizId branch.
+    if (quizId && quizId.match(/^[0-9a-fA-F]{24}$/)) {
+      filter.quizId = quizId;
+    } else if (configId) {
+      // Filter by quiz config — include null-quizId (legacy) attempts so they are not dropped
       const quizIds = await Quiz.distinct("_id", { quizConfigId: configId });
       filter.quizId = { $in: [null, ...quizIds] };
     }
@@ -548,6 +555,133 @@ router.get("/:id", authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal server error while fetching quiz attempt"
+    });
+  }
+});
+
+// POST /api/quiz-attempts/admin/clear-by-quiz/:quizId - Clear one quiz's board (admin only).
+//
+// Two independent switches in the body:
+//   deleteAttempts  - permanently delete this quiz's own QuizAttempt rows
+//   clearCarryOver  - drop includedQuizIds so borrowed points stop showing
+//
+// Unlike clear-all this writes NO backup - deletion is final.
+//
+// Attempts belonging to the carried-over quizzes are never touched; those are
+// other quizzes' data. Note that deleting this quiz's attempts does remove
+// these points from any other quiz that carries over from it, since boards are
+// computed from attempt rows at read time.
+router.post("/admin/clear-by-quiz/:quizId", authenticateToken, async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const { deleteAttempts = false, clearCarryOver = false } = req.body || {};
+
+    if (!quizId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: "Invalid quiz ID format" });
+    }
+
+    if (!deleteAttempts && !clearCarryOver) {
+      return res.status(400).json({
+        success: false,
+        message: "Nothing to clear. Set deleteAttempts and/or clearCarryOver."
+      });
+    }
+
+    const quiz = await Quiz.findById(quizId).select("_id title includedQuizIds");
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    let deletedCount = 0;
+    if (deleteAttempts) {
+      const result = await QuizAttempt.deleteMany({ quizId });
+      deletedCount = result.deletedCount || 0;
+    }
+
+    let carryOverRemoved = 0;
+    if (clearCarryOver) {
+      carryOverRemoved = (quiz.includedQuizIds || []).length;
+      await Quiz.findByIdAndUpdate(quizId, { includedQuizIds: [] });
+    }
+
+    console.log(
+      `[ClearQuizPoints] admin=${req.userId || "unknown"} quiz=${quizId} deletedAttempts=${deletedCount} carryOverRemoved=${carryOverRemoved}`
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Quiz leaderboard cleared successfully",
+      data: { quizId, deletedCount, carryOverRemoved }
+    });
+  } catch (error) {
+    console.error("[ClearQuizPoints] error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while clearing quiz leaderboard"
+    });
+  }
+});
+
+// POST /api/quiz-attempts/admin/clear-all - Permanently delete every quiz attempt
+// (admin only). Writes a full NDJSON backup to disk BEFORE deleting anything,
+// then streams that same file back as the response so the admin keeps a copy.
+//
+// Scope is quiz attempts only. Story puzzle and jigsaw stars are never touched.
+router.post("/admin/clear-all", authenticateToken, async (req, res) => {
+  try {
+    const total = await QuizAttempt.countDocuments({});
+    if (total === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No quiz attempts to clear",
+        data: { deletedCount: 0 }
+      });
+    }
+
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const backupDir = path.resolve(__dirname, "../backups/quiz-attempt-clears");
+    fs.mkdirSync(backupDir, { recursive: true });
+    const filename = `quiz-attempts-backup-${stamp}.ndjson`;
+    const filePath = path.join(backupDir, filename);
+
+    // Write the backup and wait for the stream to flush and close. Nothing is
+    // deleted until this resolves.
+    const written = await new Promise((resolve, reject) => {
+      const writeStream = fs.createWriteStream(filePath, { encoding: "utf8" });
+      let count = 0;
+
+      writeStream.on("error", reject);
+
+      (async () => {
+        try {
+          const cursor = QuizAttempt.find({}).lean().cursor();
+          for await (const doc of cursor) {
+            writeStream.write(`${JSON.stringify(doc)}\n`);
+            count += 1;
+          }
+          writeStream.end(() => resolve(count));
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+
+    const result = await QuizAttempt.deleteMany({});
+
+    console.log(
+      `[QuizAttemptClearAll] admin=${req.userId || "unknown"} backedUp=${written} deleted=${result.deletedCount} file=${filePath}`
+    );
+
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", "application/x-ndjson");
+    res.setHeader("X-Deleted-Count", String(result.deletedCount));
+    res.setHeader("X-Backup-Count", String(written));
+    fs.createReadStream(filePath).pipe(res);
+  } catch (error) {
+    console.error("[QuizAttemptClearAll] error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while clearing quiz attempts"
     });
   }
 });
