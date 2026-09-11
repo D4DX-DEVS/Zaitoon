@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import SuccessModal from '../components/SuccessModal'
+import ClearQuizPointsModal from '../components/ClearQuizPointsModal'
 import axios from 'axios'
 import { SkeletonCards } from '../components/Skeleton'
-import { 
-  FiPlus, 
+import { fetchClearContext, clearQuizPoints } from '../utils/quizClear'
+import {
+  FiPlus,
   FiX,
   FiEdit3,
   FiTrash2,
   FiCalendar,
   FiCheck,
-  FiXCircle
+  FiXCircle,
+  FiRotateCcw
 } from 'react-icons/fi'
 
 function Quizzes() {
@@ -34,8 +37,17 @@ function Quizzes() {
     quizDate: '',
     questions: [],
     status: 'Active',
-    quizConfigId: ''
+    quizConfigId: '',
+    includedQuizIds: []
   })
+  // Presentational only - includedQuizIds is the source of truth on the server.
+  const [includeMode, setIncludeMode] = useState('no')
+  const [candidateQuizzes, setCandidateQuizzes] = useState([])
+
+  // Per-quiz leaderboard clearing
+  const [clearTarget, setClearTarget] = useState(null)
+  const [clearContext, setClearContext] = useState({ attemptCount: 0, referencedBy: 0 })
+  const [clearCountLoading, setClearCountLoading] = useState(false)
 
   useEffect(() => {
     fetchQuizzes(1)
@@ -116,11 +128,62 @@ function Quizzes() {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     if (name === 'quizConfigId') {
-      setFormData(prev => ({ ...prev, quizConfigId: value, questions: [] }))
+      setFormData(prev => ({ ...prev, quizConfigId: value, questions: [], includedQuizIds: [] }))
       fetchQuestions(value)
+      fetchCandidateQuizzes(value, formData.quizDate)
+    } else if (name === 'quizDate') {
+      setFormData(prev => ({ ...prev, quizDate: value }))
+      fetchCandidateQuizzes(formData.quizConfigId, value)
     } else {
       setFormData(prev => ({ ...prev, [name]: value }))
     }
+  }
+
+  // Quizzes offered as leaderboard sources: same programme, earlier date,
+  // never the quiz being edited.
+  const fetchCandidateQuizzes = async (configId, beforeDate, excludeId = editingQuiz?._id) => {
+    if (!beforeDate) {
+      setCandidateQuizzes([])
+      return
+    }
+    try {
+      const token = localStorage.getItem('adminToken')
+      const params = { limit: 1000 }
+      if (configId) params.configId = configId
+      const res = await axios.get(`${API_BASE}/quizzes`, {
+        params,
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.data.success) {
+        const cutoff = new Date(beforeDate)
+        cutoff.setHours(0, 0, 0, 0)
+        setCandidateQuizzes(
+          (res.data.data.quizzes || []).filter(q =>
+            new Date(q.quizDate) < cutoff && q._id !== excludeId
+          )
+        )
+      }
+    } catch (e) {
+      console.error('Failed to fetch candidate quizzes:', e)
+      setCandidateQuizzes([])
+    }
+  }
+
+  const handleIncludedQuizToggle = (quizId) => {
+    setFormData(prev => {
+      const isSelected = prev.includedQuizIds.includes(quizId)
+      return {
+        ...prev,
+        includedQuizIds: isSelected
+          ? prev.includedQuizIds.filter(id => id !== quizId)
+          : [...prev.includedQuizIds, quizId]
+      }
+    })
+  }
+
+  const handleIncludeModeChange = (mode) => {
+    setIncludeMode(mode)
+    if (mode === 'no') setFormData(prev => ({ ...prev, includedQuizIds: [] }))
   }
 
   const handleQuestionToggle = (questionId) => {
@@ -172,15 +235,20 @@ function Quizzes() {
   const handleEdit = (quiz) => {
     setEditingQuiz(quiz)
     const cfgId = quiz.quizConfigId || ''
+    const included = (quiz.includedQuizIds || []).map(q => q._id || q)
+    const quizDate = quiz.quizDate ? new Date(quiz.quizDate).toISOString().split('T')[0] : ''
+    setIncludeMode(included.length > 0 ? 'yes' : 'no')
+    fetchCandidateQuizzes(cfgId, quizDate, quiz._id)
     setFormData({
       title: quiz.title || '',
       mlTitle: quiz.mlTitle || '',
       description: quiz.description || '',
       mlDescription: quiz.mlDescription || '',
-      quizDate: quiz.quizDate ? new Date(quiz.quizDate).toISOString().split('T')[0] : '',
+      quizDate,
       questions: quiz.questions?.map(q => q._id || q) || [],
       status: quiz.status || 'Active',
-      quizConfigId: cfgId
+      quizConfigId: cfgId,
+      includedQuizIds: included
     })
     fetchQuestions(cfgId)
     setShowForm(true)
@@ -210,6 +278,34 @@ function Quizzes() {
     showModal('confirmation', 'Are you sure you want to delete this quiz?', () => confirmDelete(quizId), null)
   }
 
+  const openClearModal = async (quiz) => {
+    setClearTarget(quiz)
+    setClearContext({ attemptCount: 0, referencedBy: 0 })
+    setClearCountLoading(true)
+    try {
+      setClearContext(await fetchClearContext(API_BASE, quiz))
+    } catch (e) {
+      console.error('Failed to load clear context:', e)
+    } finally {
+      setClearCountLoading(false)
+    }
+  }
+
+  const handleClearConfirm = async (options) => {
+    const quiz = clearTarget
+    setClearTarget(null)
+    try {
+      const { deletedCount, carryOverRemoved } = await clearQuizPoints(API_BASE, quiz._id, options)
+      const parts = []
+      if (options.deleteAttempts) parts.push(`${deletedCount} attempt(s) deleted`)
+      if (options.clearCarryOver) parts.push(`${carryOverRemoved} carried-over quiz(zes) removed`)
+      showModal('success', parts.join(', '))
+      fetchQuizzes(currentPage)
+    } catch (error) {
+      showModal('error', error.response?.data?.message || 'Failed to clear leaderboard')
+    }
+  }
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -219,8 +315,11 @@ function Quizzes() {
       quizDate: '',
       questions: [],
       status: 'Active',
-      quizConfigId: filterConfigId || ''
+      quizConfigId: filterConfigId || '',
+      includedQuizIds: []
     })
+    setIncludeMode('no')
+    setCandidateQuizzes([])
     setEditingQuiz(null)
   }
 
@@ -412,6 +511,69 @@ function Quizzes() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Include data from previous quizzes?
+                      </label>
+                      <div className="flex gap-6 mb-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            checked={includeMode === 'no'}
+                            onChange={() => handleIncludeModeChange('no')}
+                            className="text-purple-600"
+                          />
+                          <span className="text-gray-300 text-sm">No — start a fresh leaderboard</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            checked={includeMode === 'yes'}
+                            onChange={() => handleIncludeModeChange('yes')}
+                            className="text-purple-600"
+                          />
+                          <span className="text-gray-300 text-sm">Yes — carry over selected quizzes</span>
+                        </label>
+                      </div>
+
+                      {includeMode === 'yes' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Select Previous Quizzes ({formData.includedQuizIds.length} selected)
+                          </label>
+                          <div className="bg-gray-700 rounded-lg p-4 max-h-64 overflow-y-auto">
+                            {candidateQuizzes.length === 0 ? (
+                              <p className="text-gray-400 text-sm">
+                                {formData.quizDate
+                                  ? 'No earlier quizzes available for this programme.'
+                                  : 'Pick a quiz date first.'}
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                {candidateQuizzes.map(q => (
+                                  <label
+                                    key={q._id}
+                                    className="flex items-start space-x-3 p-2 hover:bg-gray-600 rounded cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={formData.includedQuizIds.includes(q._id)}
+                                      onChange={() => handleIncludedQuizToggle(q._id)}
+                                      className="mt-1"
+                                    />
+                                    <div>
+                                      <p className="text-white text-sm">{q.title}</p>
+                                      <p className="text-gray-400 text-xs">{formatDate(q.quizDate)}</p>
+                                    </div>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Select Questions * ({formData.questions.length} selected)
                       </label>
                       <div className="bg-gray-700 rounded-lg p-4 max-h-64 overflow-y-auto">
@@ -508,12 +670,21 @@ function Quizzes() {
                     <button
                       onClick={() => handleEdit(quiz)}
                       className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      title="Edit quiz"
                     >
                       <FiEdit3 className="w-4 h-4" />
                     </button>
                     <button
+                      onClick={() => openClearModal(quiz)}
+                      className="p-2 bg-amber-600 text-white rounded hover:bg-amber-700"
+                      title="Clear leaderboard"
+                    >
+                      <FiRotateCcw className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => handleDelete(quiz._id)}
                       className="p-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      title="Delete quiz"
                     >
                       <FiTrash2 className="w-4 h-4" />
                     </button>
@@ -572,6 +743,16 @@ function Quizzes() {
         onClose={closeModal}
         onConfirm={modal.onConfirm}
         onCancel={modal.onCancel}
+      />
+
+      <ClearQuizPointsModal
+        isOpen={!!clearTarget}
+        quiz={clearTarget}
+        attemptCount={clearContext.attemptCount}
+        referencedBy={clearContext.referencedBy}
+        countLoading={clearCountLoading}
+        onClose={() => setClearTarget(null)}
+        onConfirm={handleClearConfirm}
       />
     </div>
   )

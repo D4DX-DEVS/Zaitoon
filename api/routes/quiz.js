@@ -17,6 +17,10 @@ const {
   getQuizConfigForQuiz
 } = require("../utils/quizConfigResolver");
 const { parseClassFilter } = require("../utils/classFilter");
+const {
+  getEffectiveQuizIds,
+  getCurrentQuiz
+} = require("../utils/quizLeaderboardSource");
 const router = express.Router();
 
 // Start of "today" and "tomorrow" in given timezone (daily rollover at 12:00 AM in that zone).
@@ -876,7 +880,7 @@ router.get("/leaderboard/total", async (req, res) => {
 // GET /api/quizzes/leaderboard/by-email - Leaderboard grouped by email (paginated, searchable)
 router.get("/leaderboard/by-email", async (req, res) => {
   try {
-    const { startDate, endDate, page: pageQuery, limit: limitQuery, search, configId, classes } = req.query;
+    const { startDate, endDate, page: pageQuery, limit: limitQuery, search, configId, quizId, scope, classes } = req.query;
 
     const page = Math.max(1, parseInt(pageQuery, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(limitQuery, 10) || 10));
@@ -909,9 +913,34 @@ router.get("/leaderboard/by-email", async (req, res) => {
       }
     }
 
-    // If configId is supplied, restrict to attempts from quizzes of that config.
-    // Include null-quizId (legacy) attempts so they are not dropped from the count.
-    if (configId) {
+    // Quiz scoping. Three cases, in precedence order:
+    //   1. ?quizId=...  -> that quiz's board (its attempts + its includedQuizIds)
+    //   2. ?scope=all   -> unscoped, the historic behaviour the admin panel uses
+    //   3. neither      -> the current quiz's board. The app calls this endpoint
+    //                      with no query params at all, so this is what it gets.
+    let targetQuiz = null;
+    if (quizId) {
+      if (!quizId.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ success: false, message: "Invalid quiz ID format" });
+      }
+      targetQuiz = await Quiz.findById(quizId).select("_id includedQuizIds").lean();
+      if (!targetQuiz) {
+        return res.status(404).json({ success: false, message: "Quiz not found" });
+      }
+    } else if (scope !== "all") {
+      targetQuiz = await getCurrentQuiz();
+    }
+
+    if (targetQuiz) {
+      // Legacy attempts carry quizId null and belong to no single quiz, so they
+      // are deliberately excluded here - do not add null to this $in.
+      match.quizId = { $in: getEffectiveQuizIds(targetQuiz) };
+    } else if (scope !== "all") {
+      // No quiz to scope to: empty board rather than falling back to all-time.
+      match.quizId = { $in: [] };
+    } else if (configId) {
+      // If configId is supplied, restrict to attempts from quizzes of that config.
+      // Include null-quizId (legacy) attempts so they are not dropped from the count.
       const quizIds = await Quiz.distinct("_id", { quizConfigId: configId });
       match.quizId = { $in: [null, ...quizIds] };
     }
@@ -1291,7 +1320,8 @@ router.post("/", authenticateToken, async (req, res) => {
       quizDate,
       questions,
       status = "Active",
-      quizConfigId
+      quizConfigId,
+      includedQuizIds = []
     } = req.body;
 
     // Validate required fields
@@ -1309,6 +1339,23 @@ router.post("/", authenticateToken, async (req, res) => {
         success: false,
         message: "One or more questions not found"
       });
+    }
+
+    // Validate included quizzes exist
+    if (!Array.isArray(includedQuizIds)) {
+      return res.status(400).json({
+        success: false,
+        message: "includedQuizIds must be an array"
+      });
+    }
+    if (includedQuizIds.length > 0) {
+      const includedDocs = await Quiz.find({ _id: { $in: includedQuizIds } }).select("_id").lean();
+      if (includedDocs.length !== includedQuizIds.length) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more previous quizzes not found"
+        });
+      }
     }
 
     // Validate quiz date is unique (scoped per config if provided)
@@ -1340,6 +1387,7 @@ router.post("/", authenticateToken, async (req, res) => {
       quizDate: date,
       questions,
       status,
+      includedQuizIds,
       ...(quizConfigId ? { quizConfigId } : {})
     });
 
@@ -1424,6 +1472,29 @@ router.put("/:id", authenticateToken, async (req, res) => {
           success: false,
           message: "One or more questions not found"
         });
+      }
+    }
+
+    // Validate included quizzes if provided
+    if (updateData.includedQuizIds !== undefined) {
+      if (!Array.isArray(updateData.includedQuizIds)) {
+        return res.status(400).json({
+          success: false,
+          message: "includedQuizIds must be an array"
+        });
+      }
+
+      // A quiz already includes its own attempts, so it must never list itself.
+      updateData.includedQuizIds = updateData.includedQuizIds.filter(q => String(q) !== String(id));
+
+      if (updateData.includedQuizIds.length > 0) {
+        const includedDocs = await Quiz.find({ _id: { $in: updateData.includedQuizIds } }).select("_id").lean();
+        if (includedDocs.length !== updateData.includedQuizIds.length) {
+          return res.status(400).json({
+            success: false,
+            message: "One or more previous quizzes not found"
+          });
+        }
       }
     }
 
